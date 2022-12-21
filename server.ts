@@ -2,7 +2,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 import express, { json } from 'express'
 import { log, logRequest } from './src/logger'
-import { userRouter } from './src/routes/users'
+import { userRouter } from './src/API/routes/users'
 
 const app = express()
 

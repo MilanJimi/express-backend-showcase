@@ -13,7 +13,7 @@ const userRouter = express()
 userRouter.post('/register', async (req, res) => {
   const { error, value } = validateUser.new(req.body)
   if (error) return res.status(400).send(error)
-  if (await getUserFromDb(value.username))
+  if ((await getUserFromDb(value.username)).length > 0)
     return res.status(409).send(`User "${value.username}" already registered`)
 
   try {
@@ -41,7 +41,7 @@ userRouter.post('/login', async (req, res) => {
     }
     return res.sendStatus(500)
   } catch (e: unknown) {
-    if (e instanceof Error) log('erorr', e.message)
+    if (e instanceof Error) log('error', e.message)
     return res.sendStatus(401)
   }
 })

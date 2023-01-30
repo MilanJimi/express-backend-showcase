@@ -4,9 +4,8 @@ export const saveUserToDb = async (username: string, password: string) => {
   await db('users').insert({ username, password })
 }
 
-const usersColumns = ['id', 'username', 'password']
+const usersColumns = ['users.username', 'users.password']
 type UsersDb = {
-  id: string
   username: string
   password: string
 }

@@ -20,7 +20,7 @@ balanceRouter.post('/topup/:denomination', async (req, res) => {
     ...req.body,
     denomination: req.params.denomination
   })
-  if (error) return res.sendStatus(401)
+  if (error) return res.sendStatus(400)
 
   const newBalance = await topup(value)
 
@@ -40,10 +40,9 @@ balanceRouter.post('/withdraw/:denomination', async (req, res) => {
   } catch (e: unknown) {
     if (e instanceof Error) {
       log('error', e.message)
-      return res.send({ message: e.message })
     }
-    return res.status(500)
   }
+  return res.status(500)
 })
 
 export { balanceRouter }

@@ -15,6 +15,7 @@ export async function up(knex: Knex): Promise<void> {
     t.string('username').references('users.username').onUpdate('CASCADE')
     t.enu('denomination', denominations).notNullable()
     t.double('balance')
+    t.double('available_balance')
     t.unique(['username', 'denomination'])
   })
 

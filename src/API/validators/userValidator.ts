@@ -1,14 +1,14 @@
-import Joi from 'joi'
+import { ValidationResult } from 'joi'
 import { loginSchema, newUserSchema } from './schemas/userSchemas'
 
-type UserCredentials = {
+type UserCredentialsRequest = {
   username: string
   password: string
 }
 
 export const validateUser = {
   new: (req: unknown) =>
-    newUserSchema.validate(req) as Joi.ValidationResult<UserCredentials>,
+    newUserSchema.validate(req) as ValidationResult<UserCredentialsRequest>,
   login: (req: unknown) =>
-    loginSchema.validate(req) as Joi.ValidationResult<UserCredentials>
+    loginSchema.validate(req) as ValidationResult<UserCredentialsRequest>
 }

@@ -1,20 +1,23 @@
 import { db } from '../dbConnector'
+import { Denomination } from './orders'
 
 const balanceColumns = [
   'user_balances.id',
   'user_balances.username',
   'user_balances.denomination',
-  'user_balances.balance'
+  'user_balances.balance',
+  'user_balances.available_balance'
 ]
 type Balance = {
   id: string
   username: string
-  denomination: string
+  denomination: Denomination
   balance: number
+  availableBalance: number
 }
 type GetBalanceFilters = {
   username: string
-  denomination: string
+  denomination: Denomination
 }
 
 export const getBalancesFromDb = async (username: string) =>
@@ -30,7 +33,7 @@ export const getSingleBalanceFromDb = async (filters: GetBalanceFilters) =>
 
 export const upsertBalanceToDb = async (
   username: string,
-  denomination: string,
+  denomination: Denomination,
   newBalance: number
 ) =>
   await db('public.user_balances')

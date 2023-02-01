@@ -2,8 +2,8 @@ import { isNil } from 'lodash'
 import {
   getSingleBalanceFromDb,
   upsertBalanceToDb
-} from '../../../db/requests/balance'
-import { BalanceRequest } from '../../validators/balanceValidator'
+} from '../../../../db/requests/balance'
+import { BalanceRequest } from '../../../validators/balanceValidator'
 
 const updateBalance = async ({
   username,

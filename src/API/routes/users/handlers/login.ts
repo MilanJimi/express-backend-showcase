@@ -2,11 +2,11 @@ import bcrypt from 'bcrypt'
 import { Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 
-import { config } from '../../../config/config'
-import { getUserFromDb } from '../../../db/requests/user'
-import { validateUser } from '../../validators/userValidator'
+import { config } from '../../../../config/config'
+import { getUserFromDb } from '../../../../db/requests/user'
+import { validateUser } from '../../../validators/userValidator'
 
-export const login = async (req: Request, res: Response) => {
+export const handleLogin = async (req: Request, res: Response) => {
   const { error, value } = validateUser.login(req.body)
   if (error) return res.status(400).send(error)
 

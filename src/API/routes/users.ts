@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken'
 
 import { config } from '../../config/config'
 import { getUserFromDb, saveUserToDb } from '../../db/requests/user'
-import { log } from '../../logger'
+import { log } from '../../logging/logger'
 import { authenticate } from '../middleware/authenticate'
 import { validateUser } from '../validators/userValidator'
 

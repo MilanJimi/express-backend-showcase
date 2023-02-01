@@ -1,7 +1,7 @@
 import dotenv from 'dotenv'
 dotenv.config()
 import express, { json } from 'express'
-import { log, logRequest } from './src/logger'
+import { log, logRequest } from './src/logging/logger'
 import { userRouter } from './src/API/routes/users'
 import { balanceRouter } from './src/API/routes/balance/balance'
 import { standingOrderRouter } from './src/API/routes/orders/standingOrder'

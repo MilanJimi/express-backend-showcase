@@ -6,7 +6,7 @@ import {
   insertStandingOrderToDb,
   OrderStatus
 } from '../../../db/requests/orders'
-import { log } from '../../../logger'
+import { log } from '../../../logging/logger'
 import { authenticate } from '../../middleware/authenticate'
 import { getPagination } from '../../utils/pagination'
 import { validateOrder } from '../../validators/orderValidator'

@@ -1,7 +1,7 @@
 import express from 'express'
 
 import { getBalancesFromDb } from '../../../db/requests/balance'
-import { log } from '../../../logger'
+import { log } from '../../../logging/logger'
 import { authenticate } from '../../middleware/authenticate'
 import { validateBalance } from '../../validators/balanceValidator'
 import { topup, withdraw } from './balanceUpdate'

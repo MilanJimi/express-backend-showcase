@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import winston from 'winston'
+import { redactFields } from './redact'
 
 const { combine, timestamp, printf, colorize, splat } = winston.format
 
@@ -36,7 +37,7 @@ export const logRequest = (req: Request, _: Response, next: () => unknown) => {
   const bodyString = Object.keys(req.body).length > 0 ? ' with body %o' : ''
   logger.info(
     `Received request ${req.method}: ${req.originalUrl}${bodyString}`,
-    req.body
+    redactFields(req.body)
   )
   next()
 }

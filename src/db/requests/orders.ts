@@ -1,4 +1,6 @@
+import { Pagination } from '../../API/utils/pagination'
 import { StandingOrderRequest } from '../../API/validators/orderValidator'
+import { filterNil } from '../../utils/objectUtils'
 import { db } from '../dbConnector'
 
 const orderColumns = [
@@ -39,13 +41,27 @@ type GetOrderFilter = Partial<{
   id: string
   username: string
   status: OrderStatus
-  denomination: Denomination
+  buyDenomination: Denomination
+  sellDenomination: Denomination
 }>
 
-export const getStandingOrdersFromDb = async (filter: GetOrderFilter) =>
+export const getStandingOrdersFromDb = async (
+  { offset, perPage }: Pagination,
+  { id, username, status, buyDenomination, sellDenomination }: GetOrderFilter
+) =>
   db('public.standing_orders')
     .select<StandingOrder[]>(orderColumns)
-    .where(filter)
+    .where(
+      filterNil({
+        id,
+        username,
+        status,
+        buy_denomination: buyDenomination,
+        sell_denomination: sellDenomination
+      })
+    )
+    .offset(offset)
+    .limit(perPage)
 
 export const getSingleStandingOrderFromDb = async (filters: GetOrderFilter) =>
   db('public.standing_orders')

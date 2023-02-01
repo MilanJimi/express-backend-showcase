@@ -1,11 +1,14 @@
-import express from 'express'
+import express, { Request } from 'express'
 import {
+  Denomination,
   getSingleStandingOrderFromDb,
   getStandingOrdersFromDb,
-  insertStandingOrderToDb
+  insertStandingOrderToDb,
+  OrderStatus
 } from '../../../db/requests/orders'
 import { log } from '../../../logger'
 import { authenticate } from '../../middleware/authenticate'
+import { getPagination } from '../../utils/pagination'
 import { validateOrder } from '../../validators/orderValidator'
 
 const standingOrderRouter = express()
@@ -26,10 +29,39 @@ standingOrderRouter.post('/new', async (req, res) => {
   return res.status(500)
 })
 
-standingOrderRouter.get('/', async (req, res) => {
-  const orders = await getStandingOrdersFromDb({ ...req.query })
-  res.send(orders)
-})
+type QueryParams = Partial<{
+  perPage: number
+  page: number
+  username: string
+  id: string
+  status: OrderStatus
+  buyDenomination: Denomination
+  sellDenomination: Denomination
+}>
+
+standingOrderRouter.get(
+  '/',
+  async (req: Request<unknown, unknown, unknown, QueryParams>, res) => {
+    const {
+      id,
+      username,
+      status,
+      buyDenomination,
+      sellDenomination,
+      perPage,
+      page
+    } = req.query
+    const pagination = getPagination(perPage, page)
+    const orders = await getStandingOrdersFromDb(pagination, {
+      id,
+      username,
+      status,
+      buyDenomination,
+      sellDenomination
+    })
+    res.send(orders)
+  }
+)
 
 standingOrderRouter.get('/:id', async (req, res) =>
   res.send(await getSingleStandingOrderFromDb({ id: req.params.id }))

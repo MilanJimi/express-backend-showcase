@@ -41,3 +41,13 @@ export const logRequest = (req: Request, _: Response, next: () => unknown) => {
   )
   next()
 }
+
+export const logResponse = (_: Request, res: Response, next: () => unknown) => {
+  const send = res.send
+  res.send = (body) => {
+    logger.info(`Responding with code: ${res.statusCode}, Body: %o`, body)
+    res.send = send
+    return res.send(body)
+  }
+  next()
+}

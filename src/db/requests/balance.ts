@@ -13,11 +13,18 @@ type Balance = {
   username: string
   denomination: Denomination
   balance: number
-  availableBalance: number
+  available_balance: number
 }
 type GetBalanceFilters = {
   username: string
   denomination: Denomination
+}
+
+type UpsertBalanceParams = {
+  username: string
+  denomination: Denomination
+  newBalance: number
+  newAvailableBalance: number
 }
 
 export const getBalancesFromDb = async (username: string) =>
@@ -31,17 +38,38 @@ export const getSingleBalanceFromDb = async (filters: GetBalanceFilters) =>
     .where(filters)
     .first()
 
-export const upsertBalanceToDb = async (
-  username: string,
-  denomination: Denomination,
-  newBalance: number
-) =>
+export const upsertBalanceToDb = async ({
+  username,
+  denomination,
+  newBalance,
+  newAvailableBalance
+}: UpsertBalanceParams) =>
   await db('public.user_balances')
     .insert({
-      username: username,
+      username,
       denomination,
-      balance: newBalance
+      balance: newBalance,
+      available_balance: newAvailableBalance
     })
     .onConflict(['username', 'denomination'])
     .merge()
     .returning<Balance[]>(balanceColumns)
+
+export const putMoneyOnHoldInDb = async (
+  username: string,
+  denomination: Denomination,
+  amount: number
+) => {
+  const currentBalance = await getSingleBalanceFromDb({
+    username,
+    denomination
+  })
+  if (!currentBalance || amount > currentBalance.available_balance)
+    throw Error(`NOT_ENOUGH_BALANCE_${denomination}`)
+  return await db('public.user_balances')
+    .update({
+      available_balance: currentBalance.available_balance - amount
+    })
+    .where({ username, denomination })
+    .returning<Balance[]>(balanceColumns)
+}

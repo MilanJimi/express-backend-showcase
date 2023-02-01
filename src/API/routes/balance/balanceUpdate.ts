@@ -1,3 +1,4 @@
+import { isNil } from 'lodash'
 import {
   getSingleBalanceFromDb,
   upsertBalanceToDb
@@ -9,17 +10,25 @@ const updateBalance = async ({
   denomination,
   amount
 }: BalanceRequest) => {
-  const currentBalance =
-    (
-      await getSingleBalanceFromDb({
-        username,
-        denomination
-      })
-    )?.balance ?? 0
+  const currentBalance = await getSingleBalanceFromDb({
+    username,
+    denomination
+  })
+  const newBalance = isNil(currentBalance)
+    ? amount
+    : currentBalance.balance + amount
+  const newAvailableBalance = isNil(currentBalance)
+    ? amount
+    : currentBalance.available_balance + amount
 
-  const newBalance = currentBalance + amount
-
-  return (await upsertBalanceToDb(username, denomination, newBalance))[0]
+  return (
+    await upsertBalanceToDb({
+      username,
+      denomination,
+      newBalance,
+      newAvailableBalance
+    })
+  )[0]
 }
 
 /* 

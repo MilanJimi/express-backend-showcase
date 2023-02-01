@@ -1,4 +1,5 @@
 import express, { Request } from 'express'
+import { putMoneyOnHoldInDb } from '../../../db/requests/balance'
 import {
   Denomination,
   getSingleStandingOrderFromDb,
@@ -19,14 +20,20 @@ standingOrderRouter.post('/new', async (req, res) => {
   if (error) return res.sendStatus(400)
 
   try {
+    await putMoneyOnHoldInDb(
+      value.username,
+      value.sellDenomination,
+      value.amount
+    )
     const response = await insertStandingOrderToDb(value)
     return res.send(response)
   } catch (e) {
     if (e instanceof Error) {
       log('error', e.message)
+      return res.status(500).send(e.message)
     }
+    return res.sendStatus(500)
   }
-  return res.status(500)
 })
 
 type QueryParams = Partial<{

@@ -3,6 +3,7 @@ import {
   getSingleBalanceFromDb,
   upsertBalanceToDb
 } from '../../../../db/requests/balance'
+import { UserFacingError } from '../../../utils/error'
 import { BalanceRequest } from '../../../validators/balanceValidator'
 
 const updateBalance = async ({
@@ -48,7 +49,7 @@ export const withdraw = async ({
     denomination
   })
   if (!currentBalance || currentBalance?.balance < amount)
-    throw Error('ERROR_INSUFFICIENT_BALANCE')
+    throw new UserFacingError('ERROR_INSUFFICIENT_BALANCE')
 
   /*
     Send an API call to our bank to send money to customer's bank account

@@ -1,4 +1,5 @@
 import dotenv from 'dotenv'
+import { UserFacingError } from '../API/utils/error'
 dotenv.config()
 
 export const assertIsDefined: <T>(
@@ -6,7 +7,9 @@ export const assertIsDefined: <T>(
   name: string
 ) => asserts val is NonNullable<T> = (val, name) => {
   if (val === undefined || val === null) {
-    throw new Error(`Expected '${name}' to be defined, but received ${val}`)
+    throw new UserFacingError(
+      `Expected '${name}' to be defined, but received ${val}`
+    )
   }
 }
 

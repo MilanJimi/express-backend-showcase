@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { log } from '../../logging/logger'
+import { UserFacingError } from './error'
 
 type PromiseFunction = (
   req: Request,
@@ -13,13 +14,9 @@ export const catchExceptions =
     try {
       return await handler(req, res, next)
     } catch (error: unknown) {
-      if (error instanceof Error)
-        log(
-          'error',
-          error.message === ''
-            ? 'There has been an unknown error'
-            : error.message
-        )
-      return res.sendStatus(500)
+      if (error instanceof Error) log('error', error.message)
+      if (error instanceof UserFacingError)
+        return res.status(500).send(error.userFacingMessage)
+      return res.status(500).send('UNKNOWN_ERROR')
     }
   }

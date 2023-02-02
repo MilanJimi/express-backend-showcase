@@ -1,3 +1,4 @@
+import { UserFacingError } from '../../API/utils/error'
 import { db } from '../dbConnector'
 import { Denomination } from './orders'
 
@@ -65,7 +66,7 @@ export const putMoneyOnHoldInDb = async (
     denomination
   })
   if (!currentBalance || amount > currentBalance.available_balance)
-    throw Error(`NOT_ENOUGH_BALANCE_${denomination}`)
+    throw new UserFacingError(`NOT_ENOUGH_BALANCE_${denomination}`)
   return await db('public.user_balances')
     .update({
       available_balance: currentBalance.available_balance - amount

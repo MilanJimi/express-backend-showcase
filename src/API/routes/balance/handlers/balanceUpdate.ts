@@ -1,7 +1,7 @@
 import { isNil } from 'lodash'
 import {
-  getSingleBalanceFromDb,
-  upsertBalanceToDb
+  getSingleBalanceDB,
+  upsertBalanceDB
 } from '../../../../db/requests/balance'
 import { UserFacingError } from '../../../utils/error'
 import { BalanceRequest } from '../../../validators/balanceValidator'
@@ -11,7 +11,7 @@ const updateBalance = async ({
   denomination,
   amount
 }: BalanceRequest) => {
-  const currentBalance = await getSingleBalanceFromDb({
+  const currentBalance = await getSingleBalanceDB({
     username,
     denomination
   })
@@ -23,7 +23,7 @@ const updateBalance = async ({
     : currentBalance.available_balance + amount
 
   return (
-    await upsertBalanceToDb({
+    await upsertBalanceDB({
       username,
       denomination,
       newBalance,
@@ -44,7 +44,7 @@ export const withdraw = async ({
   denomination,
   amount
 }: BalanceRequest) => {
-  const currentBalance = await getSingleBalanceFromDb({
+  const currentBalance = await getSingleBalanceDB({
     username,
     denomination
   })

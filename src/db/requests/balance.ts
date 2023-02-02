@@ -1,3 +1,4 @@
+import { Knex } from 'knex'
 import { UserFacingError } from '../../API/utils/error'
 import { db } from '../dbConnector'
 import { Denomination } from './orders'
@@ -27,19 +28,24 @@ type UpsertBalanceParams = {
   newBalance: number
   newAvailableBalance: number
 }
+interface PutMoneyOnHoldParams {
+  username: string
+  denomination: Denomination
+  amount: number
+}
 
-export const getBalancesFromDb = async (username: string) =>
+export const getBalancesDB = async (username: string) =>
   db('public.user_balances')
     .select<Balance[]>(balanceColumns)
     .where({ username })
 
-export const getSingleBalanceFromDb = async (filters: GetBalanceFilters) =>
+export const getSingleBalanceDB = async (filters: GetBalanceFilters) =>
   db('public.user_balances')
     .select<Balance[]>(balanceColumns)
     .where(filters)
     .first()
 
-export const upsertBalanceToDb = async ({
+export const upsertBalanceDB = async ({
   username,
   denomination,
   newBalance,
@@ -56,18 +62,17 @@ export const upsertBalanceToDb = async ({
     .merge()
     .returning<Balance[]>(balanceColumns)
 
-export const putMoneyOnHoldInDb = async (
-  username: string,
-  denomination: Denomination,
-  amount: number
+export const putMoneyOnHoldDB = async (
+  trx: Knex.Transaction,
+  { username, denomination, amount }: PutMoneyOnHoldParams
 ) => {
-  const currentBalance = await getSingleBalanceFromDb({
+  const currentBalance = await getSingleBalanceDB({
     username,
     denomination
   })
   if (!currentBalance || amount > currentBalance.available_balance)
     throw new UserFacingError(`NOT_ENOUGH_BALANCE_${denomination}`)
-  return await db('public.user_balances')
+  return await trx('public.user_balances')
     .update({
       available_balance: currentBalance.available_balance - amount
     })

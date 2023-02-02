@@ -1,3 +1,4 @@
+import knex, { Knex } from 'knex'
 import { Pagination } from '../../API/utils/pagination'
 import { StandingOrderRequest } from '../../API/validators/orderValidator'
 import { filterNil } from '../../utils/objectUtils'
@@ -45,7 +46,7 @@ type GetOrderFilter = Partial<{
   sellDenomination: Denomination
 }>
 
-export const getStandingOrdersFromDb = async (
+export const getStandingOrdersDB = async (
   { offset, perPage }: Pagination,
   { id, username, status, buyDenomination, sellDenomination }: GetOrderFilter
 ) =>
@@ -63,21 +64,24 @@ export const getStandingOrdersFromDb = async (
     .offset(offset)
     .limit(perPage)
 
-export const getSingleStandingOrderFromDb = async (filters: GetOrderFilter) =>
+export const getSingleStandingOrderDB = async (filters: GetOrderFilter) =>
   db('public.standing_orders')
     .select<StandingOrder[]>(orderColumns)
     .where(filters)
     .first()
 
-export const insertStandingOrderToDb = async ({
-  username,
-  sellDenomination,
-  buyDenomination,
-  amount,
-  limitPrice
-}: StandingOrderRequest) =>
+export const insertStandingOrderDB = async (
+  trx: Knex.Transaction,
+  {
+    username,
+    sellDenomination,
+    buyDenomination,
+    amount,
+    limitPrice
+  }: StandingOrderRequest
+) =>
   (
-    await db('public.standing_orders')
+    await trx('public.standing_orders')
       .insert({
         username,
         buy_denomination: buyDenomination,
@@ -89,3 +93,28 @@ export const insertStandingOrderToDb = async ({
       })
       .returning<StandingOrder[]>(orderColumns)
   )[0]
+
+const subtractAmountFromStandingOrderDB = async (
+  trx: Knex.Transaction,
+  id: string,
+  amount: number
+) =>
+  trx('public.standing_orders')
+    .where({ id })
+    .andWhere('standing_orders.quantity_outstanding', '>=', amount)
+    .decrement('standing_orders.quantity_outstanding', amount)
+
+const setStatusFulfilledIfZeroOutstandingDB = (
+  trx: Knex.Transaction,
+  id: string
+) =>
+  trx('public.standing_orders')
+    .where({ id })
+    .andWhere('standing_orders.quantity_outstanding', '=', 0)
+    .update('standing_orders.status', OrderStatus.fulfilled)
+
+export const fulfillOrderDB = (id: string, amount: number) =>
+  db.transaction(async (trx) => {
+    await subtractAmountFromStandingOrderDB(trx, id, amount)
+    await setStatusFulfilledIfZeroOutstandingDB(trx, id)
+  })

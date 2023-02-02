@@ -1,6 +1,6 @@
 import { db } from '../dbConnector'
 
-export const saveUserToDb = async (username: string, password: string) => {
+export const saveUserDB = async (username: string, password: string) => {
   await db('users').insert({ username, password })
 }
 
@@ -10,5 +10,5 @@ type UsersDb = {
   password: string
 }
 
-export const getUserFromDb = async (username: string) =>
+export const getUserDB = async (username: string) =>
   db('users').select<UsersDb[]>(usersColumns).where({ username })

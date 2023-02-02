@@ -1,9 +1,10 @@
 import { Request, Response } from 'express'
+import { db } from '../../../../db/dbConnector'
 
 import {
   Denomination,
-  getSingleStandingOrderFromDb,
-  getStandingOrdersFromDb,
+  getSingleStandingOrderDB,
+  getStandingOrdersDB,
   OrderStatus
 } from '../../../../db/requests/orders'
 import { getPagination } from '../../../utils/pagination'
@@ -32,7 +33,7 @@ export const handleGetFilteredOrders = async (
     page
   } = req.query
   const pagination = getPagination(perPage, page)
-  const orders = await getStandingOrdersFromDb(pagination, {
+  const orders = await getStandingOrdersDB(pagination, {
     id,
     username,
     status,
@@ -43,4 +44,4 @@ export const handleGetFilteredOrders = async (
 }
 
 export const handleGetOrderById = async (req: Request, res: Response) =>
-  res.send(await getSingleStandingOrderFromDb({ id: req.params.id }))
+  res.send(await getSingleStandingOrderDB({ id: req.params.id }))

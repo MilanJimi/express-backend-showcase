@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { getBalancesFromDb } from '../../../db/requests/balance'
+import { getBalancesDB } from '../../../db/requests/balance'
 import { log } from '../../../logging/logger'
 import { authenticate } from '../../middleware/authenticate'
 import { catchExceptions } from '../../utils/errorHandler'

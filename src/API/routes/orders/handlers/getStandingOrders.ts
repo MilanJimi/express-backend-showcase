@@ -1,11 +1,10 @@
 import { Request, Response } from 'express'
 
 import {
-  Denomination,
   getSingleStandingOrderDB,
-  getStandingOrdersDB,
-  OrderStatus
+  getStandingOrdersDB
 } from '../../../../db/requests/orders'
+import { OrderStatus, Denomination } from '../../../../db/requests/types'
 import { getPagination } from '../../../utils/pagination'
 
 type QueryParams = Partial<{

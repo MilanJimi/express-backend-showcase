@@ -1,7 +1,12 @@
 import { Knex } from 'knex'
 import { UserFacingError } from '../../API/utils/error'
 import { db } from '../dbConnector'
-import { Denomination } from './orders'
+import {
+  Balance,
+  GetBalanceFilters,
+  UpsertBalanceParams,
+  PutMoneyOnHoldParams
+} from './types'
 
 const balanceColumns = [
   'user_balances.id',
@@ -10,31 +15,6 @@ const balanceColumns = [
   'user_balances.balance',
   'user_balances.available_balance'
 ]
-type Balance = {
-  id: string
-  username: string
-  denomination: Denomination
-  balance: number
-  available_balance: number
-}
-type GetBalanceFilters = {
-  username: string
-  denomination: Denomination
-}
-
-type UpsertBalanceParams = {
-  username: string
-  denomination: string
-  amount: number
-  skipAvailableBalanceUpdate?: boolean
-}
-
-type PutMoneyOnHoldParams = {
-  username: string
-  denomination: Denomination
-  amount: number
-}
-
 export const getBalancesDB = async (username: string) =>
   db('public.user_balances')
     .select<Balance[]>(balanceColumns)

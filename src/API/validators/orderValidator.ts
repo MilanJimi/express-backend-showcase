@@ -1,25 +1,14 @@
 import { ValidationResult } from 'joi'
-import { Denomination } from '../../db/requests/orders'
 import {
   fulfillStandingOrderSchema,
   newMarketOrderSchema,
   newStandingOrderSchema
 } from './schemas/orderSchemas'
-
-export type MarketOrderRequest = {
-  username: string
-  buyDenomination: Denomination
-  sellDenomination: Denomination
-  amount: number
-}
-export type StandingOrderRequest = MarketOrderRequest & {
-  limitPrice: number
-}
-
-export type FulfillStandingOrderRequest = {
-  username: string
-  amount: number
-}
+import {
+  StandingOrderRequest,
+  FulfillStandingOrderRequest,
+  MarketOrderRequest
+} from './types'
 
 export const validateOrder = {
   newStandingOrder: (req: unknown) =>

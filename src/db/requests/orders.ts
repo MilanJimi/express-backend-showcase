@@ -2,10 +2,11 @@ import { Knex } from 'knex'
 
 import { UserFacingError } from '../../API/utils/error'
 import { Pagination } from '../../API/utils/pagination'
-import { StandingOrderRequest } from '../../API/validators/orderValidator'
+import { StandingOrderRequest } from '../../API/validators/types'
 import { filterNil } from '../../utils/objectUtils'
 import { db } from '../dbConnector'
 import { getSingleBalanceDB, upsertBalanceDB } from './balance'
+import { GetOrderFilter, OrderStatus, StandingOrder } from './types'
 
 const orderColumns = [
   'standing_orders.id',
@@ -17,37 +18,6 @@ const orderColumns = [
   'standing_orders.quantity_original',
   'standing_orders.quantity_outstanding'
 ]
-
-export enum OrderStatus {
-  live = 'LIVE',
-  fulfilled = 'FULFILLED',
-  cancelled = 'CANCELLED'
-}
-
-export enum Denomination {
-  AUD = 'AUD',
-  EUR = 'EUR',
-  USD = 'USD'
-}
-
-type StandingOrder = {
-  id: string
-  username: string
-  status: OrderStatus
-  sell_denomination: Denomination
-  buy_denomination: Denomination
-  limit_price: number
-  quantity_original: number
-  quantity_outstanding: number
-}
-
-type GetOrderFilter = Partial<{
-  id: string
-  username: string
-  status: OrderStatus
-  buyDenomination: Denomination
-  sellDenomination: Denomination
-}>
 
 export const getStandingOrdersDB = async (
   { offset, perPage }: Pagination,

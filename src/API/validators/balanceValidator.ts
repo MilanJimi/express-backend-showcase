@@ -1,16 +1,10 @@
 import { ValidationResult } from 'joi'
-import { Denomination } from '../../db/requests/orders'
 
 import {
   topupBalanceSchema,
   withdrawBalanceSchema
 } from './schemas/balanceSchemas'
-
-export type BalanceRequest = {
-  username: string
-  denomination: Denomination
-  amount: number
-}
+import { BalanceRequest } from './types'
 
 export const validateBalance = {
   topup: (req: unknown) =>
@@ -18,3 +12,4 @@ export const validateBalance = {
   withdraw: (req: unknown) =>
     withdrawBalanceSchema.validate(req) as ValidationResult<BalanceRequest>
 }
+export { BalanceRequest }

@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon server.ts"
+    "dev": "nodemon server.ts",
+    "migrate:latest": "knex migrate:latest"
   },
   "dependencies": {
     "bcrypt": "^5.1.0",

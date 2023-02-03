@@ -4,9 +4,9 @@ import { db } from '../../../../db/dbConnector'
 import { putMoneyOnHoldDB } from '../../../../db/requests/balance'
 import { insertStandingOrderDB } from '../../../../db/requests/orders'
 import {
-  StandingOrderRequest,
   validateOrder
 } from '../../../validators/orderValidator'
+import { StandingOrderRequest } from "../../../validators/types"
 
 const newStandingOrder = async (params: StandingOrderRequest) =>
   db.transaction(async (trx) => {

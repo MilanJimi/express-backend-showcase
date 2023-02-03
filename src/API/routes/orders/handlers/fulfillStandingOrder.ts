@@ -3,14 +3,12 @@ import { Request, Response } from 'express'
 import { getSingleBalanceDB } from '../../../../db/requests/balance'
 import {
   fulfillOrderDB,
-  getSingleStandingOrderDB,
-  OrderStatus
+  getSingleStandingOrderDB
 } from '../../../../db/requests/orders'
+import { OrderStatus } from '../../../../db/requests/types'
 import { UserFacingError } from '../../../utils/error'
-import {
-  FulfillStandingOrderRequest,
-  validateOrder
-} from '../../../validators/orderValidator'
+import { validateOrder } from '../../../validators/orderValidator'
+import { FulfillStandingOrderRequest } from '../../../validators/types'
 
 const fulfillOrder = async (
   orderId: string,

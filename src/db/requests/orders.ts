@@ -104,8 +104,8 @@ const subtractAmountFromStandingOrderDB = async (
 ) =>
   trx('public.standing_orders')
     .where({ id })
-    .andWhere('standing_orders.quantity_outstanding', '>=', amount)
-    .decrement('standing_orders.quantity_outstanding', amount)
+    .andWhere('quantity_outstanding', '>=', amount)
+    .decrement('quantity_outstanding', amount)
 
 const setStatusFulfilledIfZeroOutstandingDB = (
   trx: Knex.Transaction,
@@ -113,17 +113,14 @@ const setStatusFulfilledIfZeroOutstandingDB = (
 ) =>
   trx('public.standing_orders')
     .where({ id })
-    .andWhere('standing_orders.quantity_outstanding', '=', 0)
-    .update('standing_orders.status', OrderStatus.fulfilled)
+    .andWhere('quantity_outstanding', '=', 0)
+    .update('status', OrderStatus.fulfilled)
 
-const fulfillOrderDb = async (
-  orderId: string,
+export const fulfillOrderDB = async (
+  order: StandingOrder,
   buyerUsername: string,
   amount: number
 ) => {
-  const order = await getSingleStandingOrderDB({ id: orderId })
-  if (!order) throw new UserFacingError('ERROR_ORDER_NOT_FOUND')
-
   const currentBalance = await getSingleBalanceDB({
     username: buyerUsername,
     denomination: order.buy_denomination
@@ -135,7 +132,7 @@ const fulfillOrderDb = async (
 
   await db.transaction(async (trx) => {
     await Promise.all([
-      subtractAmountFromStandingOrderDB(trx, orderId, amount),
+      subtractAmountFromStandingOrderDB(trx, order.id, amount),
       upsertBalanceDB(trx, {
         username: buyerUsername,
         denomination: order.sell_denomination,
@@ -144,7 +141,8 @@ const fulfillOrderDb = async (
       upsertBalanceDB(trx, {
         username: order.username,
         denomination: order.sell_denomination,
-        amount: -amount
+        amount: -amount,
+        skipAvailableBalanceUpdate: true
       }),
       upsertBalanceDB(trx, {
         username: buyerUsername,
@@ -157,6 +155,6 @@ const fulfillOrderDb = async (
         amount: amount / order.limit_price
       })
     ])
-    await setStatusFulfilledIfZeroOutstandingDB(trx, orderId)
+    await setStatusFulfilledIfZeroOutstandingDB(trx, order.id)
   })
 }

@@ -70,7 +70,6 @@ export const upsertBalanceDB = async (
         skipAvailableBalanceUpdate ? 0 : amount
       ])
     })
-    .returning<Balance[]>(balanceColumns)
 
 export const putMoneyOnHoldDB = async (
   trx: Knex.Transaction,

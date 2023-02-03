@@ -24,11 +24,12 @@ type GetBalanceFilters = {
 
 type UpsertBalanceParams = {
   username: string
-  denomination: Denomination
-  newBalance: number
-  newAvailableBalance: number
+  denomination: string
+  amount: number
+  skipAvailableBalanceUpdate?: boolean
 }
-interface PutMoneyOnHoldParams {
+
+type PutMoneyOnHoldParams = {
   username: string
   denomination: Denomination
   amount: number
@@ -45,21 +46,30 @@ export const getSingleBalanceDB = async (filters: GetBalanceFilters) =>
     .where(filters)
     .first()
 
-export const upsertBalanceDB = async ({
-  username,
-  denomination,
-  newBalance,
-  newAvailableBalance
-}: UpsertBalanceParams) =>
-  await db('public.user_balances')
+export const upsertBalanceDB = async (
+  trx: Knex.Transaction,
+  {
+    username,
+    denomination,
+    amount,
+    skipAvailableBalanceUpdate
+  }: UpsertBalanceParams
+) =>
+  trx('public.user_balances')
     .insert({
       username,
       denomination,
-      balance: newBalance,
-      available_balance: newAvailableBalance
+      balance: amount,
+      available_balance: amount
     })
     .onConflict(['username', 'denomination'])
-    .merge()
+    .merge({
+      balance: trx.raw('?? + ?', ['user_balances.balance', amount]),
+      available_balance: trx.raw('?? + ?', [
+        'user_balances.available_balance',
+        skipAvailableBalanceUpdate ? 0 : amount
+      ])
+    })
     .returning<Balance[]>(balanceColumns)
 
 export const putMoneyOnHoldDB = async (
@@ -71,11 +81,9 @@ export const putMoneyOnHoldDB = async (
     denomination
   })
   if (!currentBalance || amount > currentBalance.available_balance)
-    throw new UserFacingError(`NOT_ENOUGH_BALANCE_${denomination}`)
+    throw new UserFacingError(`ERROR_INSUFFICIENT_BALANCE_${denomination}`)
   return await trx('public.user_balances')
-    .update({
-      available_balance: currentBalance.available_balance - amount
-    })
+    .decrement('user_balances.available_balance', amount)
     .where({ username, denomination })
     .returning<Balance[]>(balanceColumns)
 }

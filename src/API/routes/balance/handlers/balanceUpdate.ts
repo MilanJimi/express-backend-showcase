@@ -1,4 +1,4 @@
-import { isNil } from 'lodash'
+import { db } from '../../../../db/dbConnector'
 import {
   getSingleBalanceDB,
   upsertBalanceDB
@@ -11,25 +11,13 @@ const updateBalance = async ({
   denomination,
   amount
 }: BalanceRequest) => {
-  const currentBalance = await getSingleBalanceDB({
-    username,
-    denomination
-  })
-  const newBalance = isNil(currentBalance)
-    ? amount
-    : currentBalance.balance + amount
-  const newAvailableBalance = isNil(currentBalance)
-    ? amount
-    : currentBalance.available_balance + amount
-
-  return (
-    await upsertBalanceDB({
+  return db.transaction((trx) =>
+    upsertBalanceDB(trx, {
       username,
       denomination,
-      newBalance,
-      newAvailableBalance
+      amount
     })
-  )[0]
+  )
 }
 
 /* 
@@ -48,7 +36,7 @@ export const withdraw = async ({
     username,
     denomination
   })
-  if (!currentBalance || currentBalance?.balance < amount)
+  if (!currentBalance || currentBalance?.available_balance < amount)
     throw new UserFacingError('ERROR_INSUFFICIENT_BALANCE')
 
   /*

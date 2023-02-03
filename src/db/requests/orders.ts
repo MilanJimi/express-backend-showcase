@@ -1,8 +1,11 @@
-import knex, { Knex } from 'knex'
+import { Knex } from 'knex'
+
+import { UserFacingError } from '../../API/utils/error'
 import { Pagination } from '../../API/utils/pagination'
 import { StandingOrderRequest } from '../../API/validators/orderValidator'
 import { filterNil } from '../../utils/objectUtils'
 import { db } from '../dbConnector'
+import { getSingleBalanceDB, upsertBalanceDB } from './balance'
 
 const orderColumns = [
   'standing_orders.id',
@@ -33,7 +36,7 @@ type StandingOrder = {
   status: OrderStatus
   sell_denomination: Denomination
   buy_denomination: Denomination
-  limit_price: string
+  limit_price: number
   quantity_original: number
   quantity_outstanding: number
 }
@@ -113,8 +116,47 @@ const setStatusFulfilledIfZeroOutstandingDB = (
     .andWhere('standing_orders.quantity_outstanding', '=', 0)
     .update('standing_orders.status', OrderStatus.fulfilled)
 
-export const fulfillOrderDB = (id: string, amount: number) =>
-  db.transaction(async (trx) => {
-    await subtractAmountFromStandingOrderDB(trx, id, amount)
-    await setStatusFulfilledIfZeroOutstandingDB(trx, id)
+const fulfillOrderDb = async (
+  orderId: string,
+  buyerUsername: string,
+  amount: number
+) => {
+  const order = await getSingleStandingOrderDB({ id: orderId })
+  if (!order) throw new UserFacingError('ERROR_ORDER_NOT_FOUND')
+
+  const currentBalance = await getSingleBalanceDB({
+    username: buyerUsername,
+    denomination: order.buy_denomination
   })
+  if (!currentBalance || currentBalance.available_balance < amount)
+    throw new UserFacingError(
+      `ERROR_INSUFFICIENT_BALANCE_${order.buy_denomination}`
+    )
+
+  await db.transaction(async (trx) => {
+    await Promise.all([
+      subtractAmountFromStandingOrderDB(trx, orderId, amount),
+      upsertBalanceDB(trx, {
+        username: buyerUsername,
+        denomination: order.sell_denomination,
+        amount
+      }),
+      upsertBalanceDB(trx, {
+        username: order.username,
+        denomination: order.sell_denomination,
+        amount: -amount
+      }),
+      upsertBalanceDB(trx, {
+        username: buyerUsername,
+        denomination: order.buy_denomination,
+        amount: -amount / order.limit_price
+      }),
+      upsertBalanceDB(trx, {
+        username: order.username,
+        denomination: order.buy_denomination,
+        amount: amount / order.limit_price
+      })
+    ])
+    await setStatusFulfilledIfZeroOutstandingDB(trx, orderId)
+  })
+}

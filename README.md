@@ -2,6 +2,8 @@
 
 This is a personal showcase project - I'm trying to build a backend from Node.js and Express for an imagined currency exchange.
 
+The code is probably not optimized, and probably a bit messy - that's because this is a work in progress, and I prefer to not abstract and clean things up before I know what exactly will be required.
+
 The imaginary currency exchange has no opinion on which currency should cost what. Users can post their offers, containing which currency they're buying, in which currency they're paying, and how much are they willing to pay for each unit. For example:
 ```
 Users Ben (buyer) and Susie (seller) have both 10 EUR and 10 USD

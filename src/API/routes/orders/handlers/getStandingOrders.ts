@@ -31,12 +31,13 @@ export const handleGetFilteredOrders = async (
     page
   } = req.query
   const pagination = getPagination(perPage, page)
-  const orders = await getStandingOrdersDB(pagination, {
+  const orders = await getStandingOrdersDB({
     id,
     username,
     status,
     buyDenomination,
-    sellDenomination
+    sellDenomination,
+    ...pagination
   })
   res.send(orders)
 }

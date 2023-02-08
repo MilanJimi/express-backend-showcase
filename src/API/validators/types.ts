@@ -8,6 +8,7 @@ export type MarketOrderRequest = {
 }
 export type StandingOrderRequest = MarketOrderRequest & {
   limitPrice: number
+  outstandingAmount?: number
 }
 
 export type FulfillStandingOrderRequest = {

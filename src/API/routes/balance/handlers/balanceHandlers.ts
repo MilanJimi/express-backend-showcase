@@ -9,9 +9,9 @@ export const handleTopup = async (req: Request, res: Response) => {
   })
   if (error) return res.sendStatus(400)
 
-  const newBalance = await topup(value)
+  await topup(value)
 
-  return res.send({ message: 'OK', ...newBalance })
+  return res.send({ message: 'OK' })
 }
 
 export const handleWithdraw = async (req: Request, res: Response) => {

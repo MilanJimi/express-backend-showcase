@@ -28,7 +28,7 @@ const fulfillOrder = async (
   if (!currentBalance || currentBalance.available_balance < amount)
     throw new UserFacingError('ERROR_INSUFFICIENT_BALANCE')
 
-  await fulfillOrderDB(order, username, amount)
+  await fulfillOrderDB({ order, buyerUsername: username, amount })
 }
 
 export const handleFulfillOrder = async (req: Request, res: Response) => {

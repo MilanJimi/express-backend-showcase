@@ -1,12 +1,16 @@
 import { Knex } from 'knex'
 
 import { UserFacingError } from '../../API/utils/error'
-import { Pagination } from '../../API/utils/pagination'
 import { StandingOrderRequest } from '../../API/validators/types'
 import { filterNil } from '../../utils/objectUtils'
 import { db } from '../dbConnector'
 import { getSingleBalanceDB, upsertBalanceDB } from './balance'
-import { GetOrderFilter, OrderStatus, StandingOrder } from './types'
+import {
+  FulfillOrderParams,
+  GetOrderFilter,
+  OrderStatus,
+  StandingOrder
+} from './types'
 
 const orderColumns = [
   'standing_orders.id',
@@ -19,12 +23,22 @@ const orderColumns = [
   'standing_orders.quantity_outstanding'
 ]
 
-export const getStandingOrdersDB = async (
-  { offset, perPage }: Pagination,
-  { id, username, status, buyDenomination, sellDenomination }: GetOrderFilter
-) =>
+export const standingOrderSorting = {
+  priceDesc: { column: 'limit_price', direction: 'desc' }
+} as const
+
+export const getStandingOrdersDB = async ({
+  id,
+  username,
+  status,
+  buyDenomination,
+  sellDenomination,
+  offset,
+  minPrice,
+  perPage,
+  orderBy
+}: GetOrderFilter) =>
   db('public.standing_orders')
-    .select<StandingOrder[]>(orderColumns)
     .where(
       filterNil({
         id,
@@ -34,8 +48,18 @@ export const getStandingOrdersDB = async (
         sell_denomination: sellDenomination
       })
     )
-    .offset(offset)
-    .limit(perPage)
+    .modify((builder) => {
+      orderBy
+        ? builder.orderBy(orderBy.column, orderBy.direction)
+        : builder.orderBy(
+            standingOrderSorting.priceDesc.column,
+            standingOrderSorting.priceDesc.direction
+          )
+      if (minPrice) builder.andWhere('limit_price', '>=', minPrice)
+      if (offset) builder.offset(offset)
+      if (perPage) builder.limit(perPage)
+    })
+    .select<StandingOrder[]>(orderColumns)
 
 export const getSingleStandingOrderDB = async (filters: GetOrderFilter) =>
   db('public.standing_orders')
@@ -50,6 +74,7 @@ export const insertStandingOrderDB = async (
     sellDenomination,
     buyDenomination,
     amount,
+    outstandingAmount,
     limitPrice
   }: StandingOrderRequest
 ) =>
@@ -60,9 +85,12 @@ export const insertStandingOrderDB = async (
         buy_denomination: buyDenomination,
         sell_denomination: sellDenomination,
         quantity_original: amount,
-        quantity_outstanding: amount,
+        quantity_outstanding: outstandingAmount ?? amount,
         limit_price: limitPrice,
-        status: OrderStatus.live
+        status:
+          outstandingAmount && outstandingAmount > 0
+            ? OrderStatus.live
+            : OrderStatus.fulfilled
       })
       .returning<StandingOrder[]>(orderColumns)
   )[0]
@@ -87,9 +115,8 @@ const setStatusFulfilledIfZeroOutstandingDB = (
     .update('status', OrderStatus.fulfilled)
 
 export const fulfillOrderDB = async (
-  order: StandingOrder,
-  buyerUsername: string,
-  amount: number
+  { order, buyerUsername, amount }: FulfillOrderParams,
+  trx?: Knex.Transaction
 ) => {
   const currentBalance = await getSingleBalanceDB({
     username: buyerUsername,
@@ -100,7 +127,7 @@ export const fulfillOrderDB = async (
       `ERROR_INSUFFICIENT_BALANCE_${order.buy_denomination}`
     )
 
-  await db.transaction(async (trx) => {
+  await (trx ?? db).transaction(async (trx) => {
     await Promise.all([
       subtractAmountFromStandingOrderDB(trx, order.id, amount),
       upsertBalanceDB(trx, {

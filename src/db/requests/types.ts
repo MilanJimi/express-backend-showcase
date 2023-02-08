@@ -1,3 +1,5 @@
+import { Pagination } from '../../API/utils/pagination'
+
 export enum OrderStatus {
   live = 'LIVE',
   fulfilled = 'FULFILLED',
@@ -9,6 +11,11 @@ export enum Denomination {
   EUR = 'EUR',
   USD = 'USD'
 }
+export type OrderByParam = {
+  column: string
+  direction: 'asc' | 'desc'
+}
+
 export type StandingOrder = {
   id: string
   username: string
@@ -19,13 +26,17 @@ export type StandingOrder = {
   quantity_original: number
   quantity_outstanding: number
 }
-export type GetOrderFilter = Partial<{
-  id: string
-  username: string
-  status: OrderStatus
-  buyDenomination: Denomination
-  sellDenomination: Denomination
-}>
+export type GetOrderFilter = Partial<
+  Pagination & {
+    id: string
+    username: string
+    status: OrderStatus
+    buyDenomination: Denomination
+    sellDenomination: Denomination
+    minPrice: number
+    orderBy: OrderByParam
+  }
+>
 
 export type Balance = {
   id: string
@@ -47,5 +58,11 @@ export type UpsertBalanceParams = {
 export type PutMoneyOnHoldParams = {
   username: string
   denomination: Denomination
+  amount: number
+}
+
+export type FulfillOrderParams = {
+  order: StandingOrder
+  buyerUsername: string
   amount: number
 }

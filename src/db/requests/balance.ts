@@ -62,7 +62,7 @@ export const putMoneyOnHoldDB = async (
   if (!currentBalance || amount > currentBalance.available_balance)
     throw new UserFacingError(`ERROR_INSUFFICIENT_BALANCE_${denomination}`)
   return await trx('public.user_balances')
-    .decrement('user_balances.available_balance', amount)
+    .decrement('available_balance', amount)
     .where({ username, denomination })
     .returning<Balance[]>(balanceColumns)
 }

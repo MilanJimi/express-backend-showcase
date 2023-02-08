@@ -4,7 +4,7 @@ This is a personal showcase project - I'm trying to build a backend from Node.js
 
 The code is probably not optimized, and probably a bit messy - that's because this is a work in progress, and I prefer to not abstract and clean things up before I know what exactly will be required.
 
-The imaginary currency exchange has no opinion on which currency should cost what. Users can post their offers, containing which currency they're buying, in which currency they're paying, and how much are they willing to pay for each unit. For example:
+The imaginary currency exchange has no opinion on which currency should cost how much. Users can post their offers, containing which currency they're buying, in which currency they're paying, and how much are they willing to pay for each unit. For example:
 ```
 Users Ben (buyer) and Susie (seller) have both 10 EUR and 10 USD
 
@@ -15,6 +15,8 @@ Ben takes a part of this offer - he will sell 3 Euros, for which he'll get 6 Dol
 
 In the end, Ben has 7 EUR and 16 USD, Susie has 13 EUR and 4 USD, and the offer still stands - should anyone want to sell the remaining 2 EUR
 ```
+
+Now also supports automatic settlement for new standing orders up to your limit price.
 
 # Installation
 Install `yarn` and `node` (e.g. `node v16`), then run
@@ -40,7 +42,7 @@ Then you can send requests with postman, or similar tools! (Swagger UI on roadma
 # Roadmap
 ### Features
 - Market orders: Fulfill my order with existing standing orders, until I buy desired amount
-- Automatic matching of standing order: If I post "Buy 10 EUR for 5 USD", while someone sells "Buy 5 USD for 11 EUR", I want to be matched automatically with that offer.
+- Cancel standing order
 
 ### Tech
 - SwaggerUI documentation
@@ -57,7 +59,7 @@ I want to separate each framework (express, knex) to its own encapsulated functi
 Code should be self-explanatory and should read as its own documentation. Comments should explain why, not how. If you need a comment to explain "how", it's probably too complicated
 
 ## Immutable variables
-You won't find a single `let` or `var` here - rewriting variables, and globals are a bad idea and should be avoided whenever possible. They are a the right solution sometimes, but outside of puzzle/academic programming that's very rare.
+You will find very few `let` and no `var` here - rewriting variables, and globals are a bad idea and should be avoided whenever possible. They are a the right solution sometimes, but outside of puzzle/academic programming that's very rare.
 
 ## Good logging
 Logs are for free, so might as well use them. But be careful to not store sensitive data there!

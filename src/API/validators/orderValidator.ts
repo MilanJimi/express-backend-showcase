@@ -1,28 +1,15 @@
-import { ValidationResult } from 'joi'
 import {
   fulfillStandingOrderSchema,
   newMarketOrderSchema,
-  newStandingOrderSchema
+  newStandingOrderSchema,
+  updateStandingOrderSchema
 } from './schemas/orderSchemas'
-import {
-  StandingOrderRequest,
-  FulfillStandingOrderRequest,
-  MarketOrderRequest
-} from './types'
 
 export const validateOrder = {
-  newStandingOrder: (req: unknown) =>
-    newStandingOrderSchema.validate(
-      req
-    ) as ValidationResult<StandingOrderRequest>,
+  newStandingOrder: (req: unknown) => newStandingOrderSchema.validate(req),
   fulfillStandingOrder: (req: unknown) =>
-    fulfillStandingOrderSchema.validate(
-      req
-    ) as ValidationResult<FulfillStandingOrderRequest>,
+    fulfillStandingOrderSchema.validate(req),
   updateStandingOrder: (req: unknown) =>
-    newStandingOrderSchema.validate(
-      req
-    ) as ValidationResult<StandingOrderRequest>,
-  newMarketOrder: (req: unknown) =>
-    newMarketOrderSchema.validate(req) as ValidationResult<MarketOrderRequest>
+    updateStandingOrderSchema.validate(req),
+  newMarketOrder: (req: unknown) => newMarketOrderSchema.validate(req)
 }

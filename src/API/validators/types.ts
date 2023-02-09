@@ -1,4 +1,4 @@
-import { Denomination } from '../../db/requests/types'
+import { Denomination, OrderStatus } from '../../db/requests/types'
 
 export type MarketOrderRequest = {
   username: string
@@ -10,6 +10,11 @@ export type StandingOrderRequest = MarketOrderRequest & {
   limitPrice: number
   outstandingAmount?: number
 }
+
+export type UpdateStandingOrderRequest = Partial<{
+  adjustAmount: number
+  status: OrderStatus
+}>
 
 export type FulfillStandingOrderRequest = {
   username: string

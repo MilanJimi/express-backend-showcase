@@ -10,11 +10,10 @@ import {
   insertStandingOrderDB,
   standingOrderSorting
 } from '../../db/requests/orders'
-import { OrderStatus, StandingOrder } from '../../db/requests/types'
+import { OrderStatus } from '../../db/requests/types'
 import { log } from '../../logging/logger'
-import { CheapStandingOrders } from './types'
-
-type FulfillOrder = { order: StandingOrder; amount: number }
+import { CheapStandingOrders, OrderFulfillment } from './types'
+import { getAveragePrice } from './utils'
 
 const createNewStandingOrder = (
   trx: Knex.Transaction,
@@ -49,7 +48,7 @@ const findCheaperStandingOrders = async ({
 
   // This is one of the places where let is a valid choice
   let outstandingBuyerAmount = amount
-  const ordersToFulfill: FulfillOrder[] = []
+  const ordersToFulfill: OrderFulfillment[] = []
   for (const order of cheaperOrders) {
     // Amount in new buyer's order runs out
     if (order.quantity_outstanding >= outstandingBuyerAmount) {
@@ -70,11 +69,10 @@ const findCheaperStandingOrders = async ({
   }
   return { orders: ordersToFulfill, outstandingAmount: outstandingBuyerAmount }
 }
-
 const getStandingOrderPromises = (
   buyerUsername: string,
   trx: Knex.Transaction,
-  orders?: FulfillOrder[]
+  orders?: OrderFulfillment[]
 ) =>
   orders
     ? orders.map(({ order, amount }) =>
@@ -82,7 +80,7 @@ const getStandingOrderPromises = (
       )
     : []
 
-const logAutomaticFulfillment = (id: string, orders: FulfillOrder[]) =>
+const logAutomaticFulfillment = (id: string, orders: OrderFulfillment[]) =>
   orders.length > 0
     ? log(
         'info',
@@ -112,5 +110,11 @@ export const newStandingOrder = async (params: StandingOrderRequest) => {
   })
 
   logAutomaticFulfillment(response.id, orders)
-  return response
+  return {
+    order: response,
+    automaticFulfillment: {
+      quantity: params.amount - outstandingAmount,
+      averagePrice: getAveragePrice(orders)
+    }
+  }
 }

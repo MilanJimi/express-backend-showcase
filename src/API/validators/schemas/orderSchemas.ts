@@ -29,8 +29,10 @@ export const fulfillStandingOrderSchema =
 
 export const updateStandingOrderSchema = Joi.object<UpdateStandingOrderRequest>(
   {
-    adjustAmount: Joi.number().optional(),
-    status: Joi.string().valid(...allowedStatusUpdates)
+    username: Joi.string(),
+    newAmount: Joi.number().optional(),
+    status: Joi.string().valid(...allowedStatusUpdates),
+    newLimitPrice: Joi.number().optional()
   }
 )
 

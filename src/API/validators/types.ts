@@ -11,9 +11,10 @@ export type StandingOrderRequest = MarketOrderRequest & {
   outstandingAmount?: number
 }
 
-export type UpdateStandingOrderRequest = Partial<{
-  adjustAmount: number
+export type UpdateStandingOrderRequest = { username: string } & Partial<{
+  newAmount: number
   status: OrderStatus
+  newLimitPrice: number
 }>
 
 export type FulfillStandingOrderRequest = {

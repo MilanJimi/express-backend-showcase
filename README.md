@@ -42,7 +42,6 @@ Then you can send requests with postman, or similar tools! (Swagger UI on roadma
 # Roadmap
 ### Features
 - Market orders: Fulfill my order with existing standing orders, until I buy desired amount
-- Cancel standing order
 
 ### Tech
 - SwaggerUI documentation

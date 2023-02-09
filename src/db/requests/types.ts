@@ -1,4 +1,5 @@
 import { Pagination } from '../../API/utils/pagination'
+import { UpdateStandingOrderRequest } from '../../API/validators/types'
 import { OrderByParam } from '../types'
 
 export enum OrderStatus {
@@ -62,4 +63,9 @@ export type FulfillOrderParams = {
   order: StandingOrder
   buyerUsername: string
   amount: number
+}
+
+export type UpdateStandingOrderParams = UpdateStandingOrderRequest & {
+  denomination: Denomination
+  balanceAdjustment?: number
 }

@@ -1,17 +1,24 @@
 import { Knex } from 'knex'
 
 import { UserFacingError } from '../../API/utils/error'
-import { StandingOrderRequest } from '../../API/validators/types'
+import {
+  StandingOrderRequest,
+  UpdateStandingOrderRequest
+} from '../../API/validators/types'
 import { filterNil } from '../../utils/objectUtils'
 import { db } from '../dbConnector'
-import { OrderByParam } from '../types'
 import { buildOrdering } from '../utils/sorting'
-import { getSingleBalanceDB, upsertBalanceDB } from './balance'
+import {
+  adjustAvailableBalance,
+  getSingleBalanceDB,
+  upsertBalanceDB
+} from './balance'
 import {
   FulfillOrderParams,
   GetOrderFilter,
   OrderStatus,
-  StandingOrder
+  StandingOrder,
+  UpdateStandingOrderParams
 } from './types'
 
 const orderColumns = [
@@ -57,6 +64,37 @@ export const getStandingOrdersDB = async ({
       if (perPage) builder.limit(perPage)
     })
     .select<StandingOrder[]>(orderColumns)
+
+export const updateSingleStandingOrderDB = async (
+  id: string,
+  {
+    username,
+    newAmount: adjustAmount,
+    newLimitPrice: limitPrice,
+    status,
+    balanceAdjustment
+  }: UpdateStandingOrderParams
+) =>
+  db.transaction(async (trx) => {
+    const [{ sell_denomination }] = await trx('public.standing_orders')
+      .where({ id })
+      .update(
+        filterNil({
+          status,
+          limit_price: limitPrice,
+          quantity_outstanding: adjustAmount
+        })
+      )
+      .returning('sell_denomination')
+    if (balanceAdjustment) {
+      await adjustAvailableBalance(
+        trx,
+        username,
+        sell_denomination,
+        balanceAdjustment
+      )
+    }
+  })
 
 export const getSingleStandingOrderDB = async (filters: GetOrderFilter) =>
   db('public.standing_orders')

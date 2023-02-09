@@ -26,6 +26,17 @@ export const getSingleBalanceDB = async (filters: GetBalanceFilters) =>
     .where(filters)
     .first()
 
+export const adjustAvailableBalance = async (
+  trx: Knex.Transaction,
+  username: string,
+  denomination: string,
+  amount: number
+) =>
+  trx('public.user_balances')
+    .increment('available_balance', amount)
+    .where({ username, denomination })
+    .returning<Balance[]>(balanceColumns)
+
 export const upsertBalanceDB = async (
   trx: Knex.Transaction,
   {
@@ -61,8 +72,5 @@ export const putMoneyOnHoldDB = async (
   })
   if (!currentBalance || amount > currentBalance.available_balance)
     throw new UserFacingError(`ERROR_INSUFFICIENT_BALANCE_${denomination}`)
-  return await trx('public.user_balances')
-    .decrement('available_balance', amount)
-    .where({ username, denomination })
-    .returning<Balance[]>(balanceColumns)
+  return await adjustAvailableBalance(trx, username, denomination, -amount)
 }

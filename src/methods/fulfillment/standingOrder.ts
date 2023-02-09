@@ -1,6 +1,7 @@
 import { Knex } from 'knex'
 
 import { StandingOrderRequest } from '../../API/validators/types'
+import { dateOrderParams } from '../../db/common/sorting'
 import { db } from '../../db/dbConnector'
 import { putMoneyOnHoldDB } from '../../db/requests/balance'
 import {
@@ -9,9 +10,11 @@ import {
   insertStandingOrderDB,
   standingOrderSorting
 } from '../../db/requests/orders'
-import { StandingOrder } from '../../db/requests/types'
+import { OrderStatus, StandingOrder } from '../../db/requests/types'
 import { log } from '../../logging/logger'
 import { CheapStandingOrders } from './types'
+
+type FulfillOrder = { order: StandingOrder; amount: number }
 
 const createNewStandingOrder = (
   trx: Knex.Transaction,
@@ -37,16 +40,18 @@ const findCheaperStandingOrders = async ({
   const cheaperOrders = await getStandingOrdersDB({
     buyDenomination: sellDenomination,
     sellDenomination: buyDenomination,
+    status: OrderStatus.live,
     minPrice: 1 / limitPrice,
-    orderBy: standingOrderSorting.priceDesc
+    orderBy: [standingOrderSorting.priceDesc, dateOrderParams.dateAsc]
   })
   if (cheaperOrders.length === 0)
     return { orders: [], outstandingAmount: amount }
 
   // This is one of the places where let is a valid choice
   let outstandingBuyerAmount = amount
-  const ordersToFulfill: { order: StandingOrder; amount: number }[] = []
+  const ordersToFulfill: FulfillOrder[] = []
   for (const order of cheaperOrders) {
+    // Amount in new buyer's order runs out
     if (order.quantity_outstanding >= outstandingBuyerAmount) {
       ordersToFulfill.push({
         order,
@@ -55,6 +60,8 @@ const findCheaperStandingOrders = async ({
       outstandingBuyerAmount = 0
       break
     }
+
+    // There is still some outstanding amount
     outstandingBuyerAmount -= order.quantity_outstanding
     ordersToFulfill.push({
       order,
@@ -64,31 +71,46 @@ const findCheaperStandingOrders = async ({
   return { orders: ordersToFulfill, outstandingAmount: outstandingBuyerAmount }
 }
 
+const getStandingOrderPromises = (
+  buyerUsername: string,
+  trx: Knex.Transaction,
+  orders?: FulfillOrder[]
+) =>
+  orders
+    ? orders.map(({ order, amount }) =>
+        fulfillOrderDB({ order, buyerUsername, amount }, trx)
+      )
+    : []
+
+const logAutomaticFulfillment = (id: string, orders: FulfillOrder[]) =>
+  orders.length > 0
+    ? log(
+        'info',
+        `Automatic fulfillment for order ${id} with orders %j`,
+        orders.map((it) => it.order.id)
+      )
+    : log('info', `No orders found for automatic fulfillment of ${id}`)
+
 export const newStandingOrder = async (params: StandingOrderRequest) => {
-  const cheaperStandingOrders = await findCheaperStandingOrders(params)
-  return db.transaction(async (trx) => {
-    const fulfillOrdersFunctions = cheaperStandingOrders.orders
-      ? cheaperStandingOrders.orders.map(({ order, amount }) =>
-          fulfillOrderDB({ order, buyerUsername: params.username, amount }, trx)
-        )
-      : []
+  const { orders, outstandingAmount } = await findCheaperStandingOrders(params)
+
+  const response = await db.transaction(async (trx) => {
+    const fulfillOrdersFunctions = getStandingOrderPromises(
+      params.username,
+      trx,
+      orders
+    )
     const [response] = await Promise.all([
       createNewStandingOrder(trx, {
         ...params,
-        outstandingAmount: cheaperStandingOrders.outstandingAmount
+        outstandingAmount: outstandingAmount
       }),
       ...fulfillOrdersFunctions
     ])
-    cheaperStandingOrders.orders.length > 0
-      ? log(
-          'info',
-          `Automatic fulfillment for order ${response.id} with orders %j`,
-          cheaperStandingOrders.orders.map((it) => it.order.id)
-        )
-      : log(
-          'info',
-          `No orders found for automatic fulfillment of ${response.id}`
-        )
+
     return response
   })
+
+  logAutomaticFulfillment(response.id, orders)
+  return response
 }

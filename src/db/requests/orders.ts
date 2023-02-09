@@ -4,6 +4,8 @@ import { UserFacingError } from '../../API/utils/error'
 import { StandingOrderRequest } from '../../API/validators/types'
 import { filterNil } from '../../utils/objectUtils'
 import { db } from '../dbConnector'
+import { OrderByParam } from '../types'
+import { buildOrdering } from '../utils/sorting'
 import { getSingleBalanceDB, upsertBalanceDB } from './balance'
 import {
   FulfillOrderParams,
@@ -49,12 +51,7 @@ export const getStandingOrdersDB = async ({
       })
     )
     .modify((builder) => {
-      orderBy
-        ? builder.orderBy(orderBy.column, orderBy.direction)
-        : builder.orderBy(
-            standingOrderSorting.priceDesc.column,
-            standingOrderSorting.priceDesc.direction
-          )
+      buildOrdering(builder, standingOrderSorting.priceDesc, orderBy)
       if (minPrice) builder.andWhere('limit_price', '>=', minPrice)
       if (offset) builder.offset(offset)
       if (perPage) builder.limit(perPage)

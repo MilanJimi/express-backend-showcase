@@ -1,4 +1,5 @@
 import { Pagination } from '../../API/utils/pagination'
+import { OrderByParam } from '../types'
 
 export enum OrderStatus {
   live = 'LIVE',
@@ -10,10 +11,6 @@ export enum Denomination {
   AUD = 'AUD',
   EUR = 'EUR',
   USD = 'USD'
-}
-export type OrderByParam = {
-  column: string
-  direction: 'asc' | 'desc'
 }
 
 export type StandingOrder = {
@@ -34,7 +31,7 @@ export type GetOrderFilter = Partial<
     buyDenomination: Denomination
     sellDenomination: Denomination
     minPrice: number
-    orderBy: OrderByParam
+    orderBy: OrderByParam[]
   }
 >
 

@@ -41,12 +41,13 @@ Then you can send requests with postman, or similar tools! (Swagger UI on roadma
 
 # Roadmap
 ### Features
-- Market orders: Fulfill my order with existing standing orders, until I buy desired amount
+- Market Quote (before fulfilling market order)
 
 ### Tech
 - SwaggerUI documentation
 - Database population scripts, and tests
 - Docker build
+- Cleanup, refactor (I'm not particularly happy with Market/Standing order interaction)
 
 # Why do it like this?
 I am trying to practice my best practices (har har), so I try to follow a few principles

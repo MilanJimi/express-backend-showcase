@@ -1,12 +1,16 @@
 import { Request, Response } from 'express'
 
-import { validateOrder } from '../../../validators/orderValidator'
-import { newStandingOrder } from '../../../../methods/fulfillment/standingOrder'
+import { validateStandingOrder } from '../../../validators/standingOrderValidator'
+import { automaticFulfillOrder } from '../../../../methods/fulfillment/automaticFulfill'
+import { OrderType } from '../../../../methods/fulfillment/types'
 
 export const handleNewStandingOrder = async (req: Request, res: Response) => {
-  const { error, value } = validateOrder.newStandingOrder(req.body)
+  const { error, value } = validateStandingOrder.new(req.body)
   if (error) return res.sendStatus(400)
 
-  const response = await newStandingOrder(value)
+  const response = await automaticFulfillOrder({
+    ...value,
+    type: OrderType.standing
+  })
   return res.send(response)
 }

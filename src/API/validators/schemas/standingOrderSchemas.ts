@@ -2,14 +2,13 @@ import Joi from 'joi'
 import { OrderStatus } from '../../../db/requests/types'
 import {
   FulfillStandingOrderRequest,
-  MarketOrderRequest,
   StandingOrderRequest,
   UpdateStandingOrderRequest
 } from '../types'
 
 const allowedStatusUpdates = [OrderStatus.live, OrderStatus.cancelled]
 
-const baseOrderFieldsSchema = {
+export const baseOrderFieldsSchema = {
   username: Joi.string(),
   sellDenomination: Joi.string(),
   buyDenomination: Joi.string(),
@@ -34,8 +33,4 @@ export const updateStandingOrderSchema = Joi.object<UpdateStandingOrderRequest>(
     status: Joi.string().valid(...allowedStatusUpdates),
     newLimitPrice: Joi.number().optional()
   }
-)
-
-export const newMarketOrderSchema = Joi.object<MarketOrderRequest>(
-  baseOrderFieldsSchema
 )

@@ -1,10 +1,10 @@
 import { Request, Response } from 'express'
 
-import { validateOrder } from '../../../validators/orderValidator'
+import { validateStandingOrder } from '../../../validators/standingOrderValidator'
 import {
   getSingleStandingOrderDB,
   updateSingleStandingOrderDB
-} from '../../../../db/requests/orders'
+} from '../../../../db/requests/standingOrders'
 import {
   Denomination,
   OrderStatus,
@@ -66,7 +66,7 @@ export const handleUpdateStandingOrder = async (
   req: Request,
   res: Response
 ) => {
-  const { error, value } = validateOrder.updateStandingOrder(req.body)
+  const { error, value } = validateStandingOrder.update(req.body)
   if (error) return res.sendStatus(400)
 
   const { username, newAmount, newLimitPrice, status: newStatus } = value

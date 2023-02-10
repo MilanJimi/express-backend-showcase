@@ -24,6 +24,14 @@ export type StandingOrder = {
   quantity_original: number
   quantity_outstanding: number
 }
+export type MarketOrder = {
+  id: string
+  username: string
+  sell_denomination: Denomination
+  buy_denomination: Denomination
+  amount: number
+}
+
 export type GetOrderFilter = Partial<
   Pagination & {
     id: string
@@ -68,4 +76,14 @@ export type FulfillOrderParams = {
 export type UpdateStandingOrderParams = UpdateStandingOrderRequest & {
   denomination: Denomination
   balanceAdjustment?: number
+}
+
+export type TransferBalanceParams = {
+  buyerUsername: string
+  sellerUsername: string
+  buyDenomination: string
+  sellDenomination: string
+  buyAmount: number
+  sellAmount: number
+  isFromHeldBalance: boolean
 }

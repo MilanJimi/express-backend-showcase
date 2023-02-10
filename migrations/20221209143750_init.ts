@@ -1,8 +1,8 @@
 import { Knex } from 'knex'
 
+export const denominations = ['EUR', 'USD', 'AUD']
+export const orderStatus = ['LIVE', 'FULFILLED', 'CANCELLED']
 export async function up(knex: Knex): Promise<void> {
-  const denominations = ['EUR', 'USD', 'AUD']
-  const orderStatus = ['LIVE', 'FULFILLED', 'CANCELLED']
   await knex.raw('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')
 
   await knex.schema.createTable('users', (t) => {

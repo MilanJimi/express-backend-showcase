@@ -1,17 +1,15 @@
 import { Knex } from 'knex'
 
 import { UserFacingError } from '../../API/utils/error'
-import {
-  StandingOrderRequest,
-  UpdateStandingOrderRequest
-} from '../../API/validators/types'
+import { StandingOrderRequest } from '../../API/validators/types'
 import { filterNil } from '../../utils/objectUtils'
 import { db } from '../dbConnector'
 import { buildOrdering } from '../utils/sorting'
 import {
   adjustAvailableBalance,
   getSingleBalanceDB,
-  upsertBalanceDB
+  putMoneyOnHoldDB,
+  transferBalance
 } from './balance'
 import {
   FulfillOrderParams,
@@ -165,28 +163,30 @@ export const fulfillOrderDB = async (
   await (trx ?? db).transaction(async (trx) => {
     await Promise.all([
       subtractAmountFromStandingOrderDB(trx, order.id, amount),
-      upsertBalanceDB(trx, {
-        username: buyerUsername,
-        denomination: order.sell_denomination,
-        amount
-      }),
-      upsertBalanceDB(trx, {
-        username: order.username,
-        denomination: order.sell_denomination,
-        amount: -amount,
-        skipAvailableBalanceUpdate: true
-      }),
-      upsertBalanceDB(trx, {
-        username: buyerUsername,
-        denomination: order.buy_denomination,
-        amount: -amount / order.limit_price
-      }),
-      upsertBalanceDB(trx, {
-        username: order.username,
-        denomination: order.buy_denomination,
-        amount: amount / order.limit_price
+      transferBalance(trx, {
+        buyerUsername,
+        sellerUsername: order.username,
+        buyDenomination: order.buy_denomination,
+        sellDenomination: order.sell_denomination,
+        buyAmount: amount,
+        sellAmount: amount / order.limit_price,
+        isFromHeldBalance: true
       })
     ])
     await setStatusFulfilledIfZeroOutstandingDB(trx, order.id)
   })
 }
+
+export const createNewStandingOrder = (
+  trx: Knex.Transaction,
+  params: StandingOrderRequest
+) =>
+  trx.transaction(async (trx) => {
+    await putMoneyOnHoldDB(trx, {
+      username: params.username,
+      amount: params.outstandingAmount ?? params.amount,
+      denomination: params.sellDenomination
+    })
+    const response = await insertStandingOrderDB(trx, params)
+    return response
+  })

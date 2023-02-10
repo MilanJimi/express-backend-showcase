@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import {
   getSingleStandingOrderDB,
   getStandingOrdersDB
-} from '../../../../db/requests/orders'
+} from '../../../../db/requests/standingOrders'
 import { OrderStatus, Denomination } from '../../../../db/requests/types'
 import { getPagination } from '../../../utils/pagination'
 

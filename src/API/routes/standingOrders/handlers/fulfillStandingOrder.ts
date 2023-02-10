@@ -4,10 +4,10 @@ import { getSingleBalanceDB } from '../../../../db/requests/balance'
 import {
   fulfillOrderDB,
   getSingleStandingOrderDB
-} from '../../../../db/requests/orders'
+} from '../../../../db/requests/standingOrders'
 import { OrderStatus } from '../../../../db/requests/types'
 import { UserFacingError } from '../../../utils/error'
-import { validateOrder } from '../../../validators/orderValidator'
+import { validateStandingOrder } from '../../../validators/standingOrderValidator'
 import { FulfillStandingOrderRequest } from '../../../validators/types'
 
 const fulfillOrder = async (
@@ -32,7 +32,7 @@ const fulfillOrder = async (
 }
 
 export const handleFulfillOrder = async (req: Request, res: Response) => {
-  const { error, value } = validateOrder.fulfillStandingOrder(req.body)
+  const { error, value } = validateStandingOrder.fulfill(req.body)
   if (error) return res.sendStatus(400)
   const orderId = req.params.id
 

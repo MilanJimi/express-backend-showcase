@@ -5,7 +5,8 @@ import {
   Balance,
   GetBalanceFilters,
   UpsertBalanceParams,
-  PutMoneyOnHoldParams
+  PutMoneyOnHoldParams,
+  TransferBalanceParams
 } from './types'
 
 const balanceColumns = [
@@ -74,3 +75,39 @@ export const putMoneyOnHoldDB = async (
     throw new UserFacingError(`ERROR_INSUFFICIENT_BALANCE_${denomination}`)
   return await adjustAvailableBalance(trx, username, denomination, -amount)
 }
+
+export const transferBalance = async (
+  trx: Knex.Transaction,
+  {
+    buyerUsername,
+    sellerUsername,
+    buyDenomination,
+    sellDenomination,
+    buyAmount,
+    sellAmount,
+    isFromHeldBalance
+  }: TransferBalanceParams
+) =>
+  Promise.all([
+    upsertBalanceDB(trx, {
+      username: buyerUsername,
+      denomination: sellDenomination,
+      amount: buyAmount
+    }),
+    upsertBalanceDB(trx, {
+      username: sellerUsername,
+      denomination: sellDenomination,
+      amount: -buyAmount,
+      skipAvailableBalanceUpdate: isFromHeldBalance
+    }),
+    upsertBalanceDB(trx, {
+      username: buyerUsername,
+      denomination: buyDenomination,
+      amount: -sellAmount
+    }),
+    upsertBalanceDB(trx, {
+      username: sellerUsername,
+      denomination: buyDenomination,
+      amount: sellAmount
+    })
+  ])

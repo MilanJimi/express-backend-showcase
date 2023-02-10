@@ -4,7 +4,7 @@ import express, { json } from 'express'
 import { log, logRequest, logResponse } from './src/logging/logger'
 import { userRouter } from './src/API/routes/users/users'
 import { balanceRouter } from './src/API/routes/balance/balance'
-import { standingOrderRouter } from './src/API/routes/orders/standingOrder'
+import { standingOrderRouter } from './src/API/routes/standingOrders/standingOrder'
 
 const app = express()
 

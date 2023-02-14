@@ -1,13 +1,16 @@
 import dotenv from 'dotenv'
 dotenv.config()
+import swaggerUi from 'swagger-ui-express'
 import express, { json } from 'express'
 import { log, logRequest, logResponse } from './src/logging/logger'
 import { userRouter } from './src/API/routes/users/users'
 import { balanceRouter } from './src/API/routes/balance/balance'
 import { standingOrderRouter } from './src/API/routes/standingOrders/standingOrder'
 import { marketOrderRouter } from './src/API/routes/marketOrders/marketOrder'
+import { swaggerSpecs } from './docs/swagger.def'
 
 const app = express()
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs))
 
 app.use(json(), logRequest, logResponse)
 

@@ -1,18 +1,7 @@
 import { Pagination } from '../../API/utils/pagination'
 import { UpdateStandingOrderRequest } from '../../API/validators/types'
 import { OrderByParam } from '../types'
-
-export enum OrderStatus {
-  live = 'LIVE',
-  fulfilled = 'FULFILLED',
-  cancelled = 'CANCELLED'
-}
-
-export enum Denomination {
-  AUD = 'AUD',
-  EUR = 'EUR',
-  USD = 'USD'
-}
+import { OrderStatus, Denomination } from '../../enums'
 
 export type StandingOrder = {
   id: string
@@ -57,7 +46,7 @@ export type GetBalanceFilters = {
 }
 export type UpsertBalanceParams = {
   username: string
-  denomination: string
+  denomination: Denomination
   amount: number
   skipAvailableBalanceUpdate?: boolean
 }
@@ -81,8 +70,8 @@ export type UpdateStandingOrderParams = UpdateStandingOrderRequest & {
 export type TransferBalanceParams = {
   buyerUsername: string
   sellerUsername: string
-  buyDenomination: string
-  sellDenomination: string
+  buyDenomination: Denomination
+  sellDenomination: Denomination
   buyAmount: number
   sellAmount: number
   isFromHeldBalance: boolean

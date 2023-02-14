@@ -1,13 +1,35 @@
 import bcrypt from 'bcrypt'
 import { Request, Response } from 'express'
+import joiToSwagger from 'joi-to-swagger'
 import jwt from 'jsonwebtoken'
 
 import { config } from '../../../../config/config'
 import { getUserDB } from '../../../../db/requests/user'
+import { swgAuthTokenSchema } from '../../../validators/schemas/swagger'
 import { validateUser } from '../../../validators/userValidator'
 
+export const swgLogin = {
+  post: {
+    summary: 'Login',
+    tags: ['User'],
+    requestBody: {
+      content: {
+        'application/json': {
+          schema: joiToSwagger(validateUser.login).swagger
+        }
+      }
+    },
+    responses: {
+      '200': {
+        description: 'Success message',
+        content: swgAuthTokenSchema
+      }
+    }
+  }
+}
+
 export const handleLogin = async (req: Request, res: Response) => {
-  const { error, value } = validateUser.login(req.body)
+  const { error, value } = validateUser.login.validate(req.body)
   if (error) return res.status(400).send(error)
 
   const { username, password } = value

@@ -3,7 +3,7 @@ import {
   getStandingOrdersDB,
   standingOrderSorting
 } from '../../db/requests/standingOrders'
-import { OrderStatus } from '../../db/requests/types'
+import { OrderStatus } from '../../enums'
 import {
   CheapStandingOrders,
   FindStandingOrdersParams,

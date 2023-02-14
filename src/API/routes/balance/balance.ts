@@ -2,8 +2,15 @@ import express from 'express'
 
 import { authenticate } from '../../middleware/authenticate'
 import { catchExceptions } from '../../utils/errorHandler'
-import { handleTopup, handleWithdraw } from './handlers/balanceHandlers'
-import { handleGetBalance } from './handlers/getBalance'
+import { handleWithdraw, swgWithdraw } from './handlers/withdraw'
+import { handleTopup, swgTopup } from './handlers/topup'
+import { handleGetBalance, swgGetBalance } from './handlers/getBalance'
+
+export const swgBalanceRouter = {
+  '/balance': swgGetBalance,
+  '/balance/topup/{denomination}': swgTopup,
+  '/balance/withdraw/{denomination}': swgWithdraw
+}
 
 const balanceRouter = express()
 balanceRouter.use(authenticate)

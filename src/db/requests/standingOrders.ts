@@ -14,10 +14,10 @@ import {
 import {
   FulfillOrderParams,
   GetOrderFilter,
-  OrderStatus,
   StandingOrder,
   UpdateStandingOrderParams
 } from './types'
+import { ErrorCode, OrderStatus } from '../../enums'
 
 const orderColumns = [
   'standing_orders.id',
@@ -156,9 +156,7 @@ export const fulfillOrderDB = async (
     denomination: order.buy_denomination
   })
   if (!currentBalance || currentBalance.available_balance < amount)
-    throw new UserFacingError(
-      `ERROR_INSUFFICIENT_BALANCE_${order.buy_denomination}`
-    )
+    throw new UserFacingError(ErrorCode.insufficientBalance)
 
   await (trx ?? db).transaction(async (trx) => {
     await Promise.all([

@@ -8,6 +8,7 @@ import {
   PutMoneyOnHoldParams,
   TransferBalanceParams
 } from './types'
+import { Denomination, ErrorCode } from '../../enums'
 
 const balanceColumns = [
   'user_balances.id',
@@ -16,6 +17,7 @@ const balanceColumns = [
   'user_balances.balance',
   'user_balances.available_balance'
 ]
+
 export const getBalancesDB = async (username: string) =>
   db('public.user_balances')
     .select<Balance[]>(balanceColumns)
@@ -30,7 +32,7 @@ export const getSingleBalanceDB = async (filters: GetBalanceFilters) =>
 export const adjustAvailableBalance = async (
   trx: Knex.Transaction,
   username: string,
-  denomination: string,
+  denomination: Denomination,
   amount: number
 ) =>
   trx('public.user_balances')
@@ -72,7 +74,7 @@ export const putMoneyOnHoldDB = async (
     denomination
   })
   if (!currentBalance || amount > currentBalance.available_balance)
-    throw new UserFacingError(`ERROR_INSUFFICIENT_BALANCE_${denomination}`)
+    throw new UserFacingError(ErrorCode.insufficientBalance)
   return await adjustAvailableBalance(trx, username, denomination, -amount)
 }
 

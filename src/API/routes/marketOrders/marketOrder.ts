@@ -2,8 +2,14 @@ import express from 'express'
 
 import { authenticate } from '../../middleware/authenticate'
 import { catchExceptions } from '../../utils/errorHandler'
-import { handleNewMarketOrder } from './handlers/newMarketOrder'
+import {
+  handleNewMarketOrder,
+  swgNewMarketOrder
+} from './handlers/newMarketOrder'
 
+export const swgMarketOrderRouter = {
+  '/marketOrders/new': swgNewMarketOrder
+}
 const marketOrderRouter = express()
 marketOrderRouter.use(authenticate)
 

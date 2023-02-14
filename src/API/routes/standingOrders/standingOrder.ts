@@ -2,13 +2,36 @@ import express from 'express'
 
 import { authenticate } from '../../middleware/authenticate'
 import { catchExceptions } from '../../utils/errorHandler'
-import { handleFulfillOrder } from './handlers/fulfillStandingOrder'
+import {
+  handleFulfillOrder,
+  swgFulfillStandingOrder
+} from './handlers/fulfillStandingOrder'
+import {
+  handleGetOrderById,
+  swgGetSingleStandingOrder
+} from './handlers/getSingleStandingOrder'
 import {
   handleGetFilteredOrders,
-  handleGetOrderById
+  swgGetStandingOrders
 } from './handlers/getStandingOrders'
-import { handleNewStandingOrder } from './handlers/newStandingOrder'
-import { handleUpdateStandingOrder } from './handlers/updateStandingOrder'
+import {
+  handleNewStandingOrder,
+  swgNewStandingOrder
+} from './handlers/newStandingOrder'
+import {
+  handleUpdateStandingOrder,
+  swgUpdateStandingOrder
+} from './handlers/updateStandingOrder'
+
+export const swgStandingOrderRouter = {
+  '/standingOrders': swgGetStandingOrders,
+  '/standingOrders/new': swgNewStandingOrder,
+  '/standingOrders/{id}': {
+    ...swgFulfillStandingOrder,
+    ...swgUpdateStandingOrder,
+    ...swgGetSingleStandingOrder
+  }
+}
 
 const standingOrderRouter = express()
 standingOrderRouter.use(authenticate)

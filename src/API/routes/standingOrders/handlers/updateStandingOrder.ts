@@ -5,15 +5,57 @@ import {
   getSingleStandingOrderDB,
   updateSingleStandingOrderDB
 } from '../../../../db/requests/standingOrders'
-import {
-  Denomination,
-  OrderStatus,
-  StandingOrder
-} from '../../../../db/requests/types'
+import { StandingOrder } from '../../../../db/requests/types'
+import { Denomination, ErrorCode, OrderStatus } from '../../../../enums'
 import { getSingleBalanceDB } from '../../../../db/requests/balance'
 import { UserFacingError } from '../../../utils/error'
 import { UpdateStandingOrderRequest } from '../../../validators/types'
 import { log } from '../../../../logging/logger'
+import joiToSwagger from 'joi-to-swagger'
+import {
+  swgOkMessageSchema,
+  userFacingErrorSchema
+} from '../../../validators/schemas/swagger'
+export const swgUpdateStandingOrder = {
+  put: {
+    summary: 'Update own standing order - if balance is sufficient',
+    tags: ['Standing Orders'],
+    parameters: [
+      {
+        name: 'id',
+        in: 'path',
+        required: true,
+        schema: { type: 'string' }
+      }
+    ],
+    requestBody: {
+      content: {
+        'application/json': {
+          schema: joiToSwagger(validateStandingOrder.update).swagger
+        }
+      }
+    },
+    responses: {
+      '200': {
+        description: 'Success message',
+        content: swgOkMessageSchema
+      },
+      '401': { description: 'Unauthorized (if updating not own order)' },
+      '404': {
+        description: 'Not Found',
+        content: userFacingErrorSchema([ErrorCode.orderNotFound])
+      },
+      '500': {
+        description: 'Error',
+        content: userFacingErrorSchema([
+          ErrorCode.orderFulfilled,
+          ErrorCode.orderSmallerThanAmount,
+          ErrorCode.insufficientBalance
+        ])
+      }
+    }
+  }
+}
 
 type BalanceAdjustmentParams = {
   order: StandingOrder
@@ -57,26 +99,25 @@ const checkEnoughBalance = async ({
   adjustment
 }: CheckEnoughBalanceParams) => {
   const balance = await getSingleBalanceDB({ denomination, username })
-  if (!balance) throw new UserFacingError('ERROR_BALANCE_NOT_FOUND')
-  if (adjustment > balance.available_balance)
-    throw new UserFacingError('ERROR_INSUFFICIENT_BALANCE')
+  if (!balance || adjustment > balance.available_balance)
+    throw new UserFacingError(ErrorCode.insufficientBalance)
 }
 
 export const handleUpdateStandingOrder = async (
   req: Request,
   res: Response
 ) => {
-  const { error, value } = validateStandingOrder.update(req.body)
+  const { error, value } = validateStandingOrder.update.validate(req.body)
   if (error) return res.sendStatus(400)
 
   const { username, newAmount, newLimitPrice, status: newStatus } = value
   const { id } = req.params
   const order = await getSingleStandingOrderDB({ id })
 
-  if (!order) return res.sendStatus(404)
+  if (!order) throw new UserFacingError(ErrorCode.orderNotFound, 404)
   if (order.username !== value.username) return res.sendStatus(401)
   if (isCancelledAndNotReactivated(value, order))
-    throw new UserFacingError('ERROR_ORDER_CANCELLED')
+    throw new UserFacingError(ErrorCode.orderCancelled)
 
   const adjustment = getBalanceAdjustment({
     order,

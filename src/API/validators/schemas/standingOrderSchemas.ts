@@ -1,5 +1,5 @@
 import Joi from 'joi'
-import { OrderStatus } from '../../../db/requests/types'
+import { Denomination, OrderStatus } from '../../../enums'
 import {
   FulfillStandingOrderRequest,
   StandingOrderRequest,
@@ -9,9 +9,8 @@ import {
 const allowedStatusUpdates = [OrderStatus.live, OrderStatus.cancelled]
 
 export const baseOrderFieldsSchema = {
-  username: Joi.string(),
-  sellDenomination: Joi.string(),
-  buyDenomination: Joi.string(),
+  sellDenomination: Joi.string().valid(Denomination),
+  buyDenomination: Joi.string().valid(Denomination),
   amount: Joi.number()
 }
 
@@ -22,13 +21,11 @@ export const newStandingOrderSchema = Joi.object<StandingOrderRequest>({
 
 export const fulfillStandingOrderSchema =
   Joi.object<FulfillStandingOrderRequest>({
-    username: Joi.string(),
     amount: Joi.number()
   })
 
 export const updateStandingOrderSchema = Joi.object<UpdateStandingOrderRequest>(
   {
-    username: Joi.string(),
     newAmount: Joi.number().optional(),
     status: Joi.string().valid(...allowedStatusUpdates),
     newLimitPrice: Joi.number().optional()

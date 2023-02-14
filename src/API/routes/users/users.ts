@@ -2,8 +2,13 @@ import express from 'express'
 
 import { authenticate } from '../../middleware/authenticate'
 import { catchExceptions } from '../../utils/errorHandler'
-import { handleLogin } from './handlers/login'
-import { handleRegister } from './handlers/register'
+import { handleLogin, swgLogin } from './handlers/login'
+import { handleRegister, swgRegister } from './handlers/register'
+
+export const swgUsersRouter = {
+  '/users/register': swgRegister,
+  '/users/login': swgLogin
+}
 
 const userRouter = express()
 

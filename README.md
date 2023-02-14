@@ -37,14 +37,13 @@ yarn migrate:latest
 ```
 yarn dev
 ```
-Then you can send requests with postman, or similar tools! (Swagger UI on roadmap).
+Then you can send requests with postman, or similar tools. Alternatively, you can use swagger ui documentation, found on `http://localhost:3000/api-docs`.
 
 # Roadmap
 ### Features
 - Market Quote (before fulfilling market order)
 
 ### Tech
-- SwaggerUI documentation
 - Database population scripts, and tests
 - Docker build
 - Cleanup, refactor (I'm not particularly happy with Market/Standing order interaction)
@@ -62,7 +61,9 @@ Code should be self-explanatory and should read as its own documentation. Commen
 You will find very few `let` and no `var` here - rewriting variables, and globals are a bad idea and should be avoided whenever possible. They are a the right solution sometimes, but outside of puzzle/academic programming that's very rare.
 
 ## Good logging
-Logs are for free, so might as well use them. But be careful to not store sensitive data there!
+Logs are for free*, so might as well use them. But be careful to not store sensitive data there!
+
+*Terms and conditions apply
 
 ## Assume everything will go wrong
 Related to good logging. What if the server will crash when executing this task? Be prepared for fails in the most inconvenient places - middle of database inserts, disconnects right after sending requests, users being impatient and demolishing that "submit" button...
@@ -74,4 +75,4 @@ Don't Repeat Yourself is well accepted principle, but it can (rarely) be a bad t
 Just as copy-paste wastes time when maintaining, a bad abstraction might waste just as much. Only abstract when you know what will be needed, and feel free to copy-paste to better understand the problem.
 
 ## Minimum dependencies
-Only use those dependencies you need - you can do the rest yourself. You probably don't need that `isPromise` one-liner library. Ever heard of dependency attacks?
+Only use those dependencies you need - you can do the rest yourself. You probably don't need that `isPromise` one-liner library.

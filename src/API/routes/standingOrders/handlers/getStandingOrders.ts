@@ -1,11 +1,66 @@
 import { Request, Response } from 'express'
 
-import {
-  getSingleStandingOrderDB,
-  getStandingOrdersDB
-} from '../../../../db/requests/standingOrders'
-import { OrderStatus, Denomination } from '../../../../db/requests/types'
+import { getStandingOrdersDB } from '../../../../db/requests/standingOrders'
+import { Denomination, OrderStatus } from '../../../../enums'
 import { getPagination } from '../../../utils/pagination'
+import { swgMultipleStandingOrdersSchema } from '../../../validators/schemas/swagger'
+
+export const swgGetStandingOrders = {
+  get: {
+    summary: 'Get orders by filter',
+    tags: ['Standing Orders'],
+    parameters: [
+      {
+        name: 'id',
+        in: 'query',
+        required: false,
+        schema: { type: 'string' }
+      },
+      {
+        name: 'perPage',
+        in: 'query',
+        required: false,
+        schema: { type: 'number' }
+      },
+      {
+        name: 'page',
+        in: 'query',
+        required: false,
+        schema: { type: 'number' }
+      },
+      {
+        name: 'username',
+        in: 'query',
+        required: false,
+        schema: { type: 'string' }
+      },
+      {
+        name: 'status',
+        in: 'query',
+        required: false,
+        schema: { type: 'string', enum: Object.values(OrderStatus) }
+      },
+      {
+        name: 'buyDenomination',
+        in: 'query',
+        required: false,
+        schema: { type: 'string', enum: Object.values(Denomination) }
+      },
+      {
+        name: 'sellDenomination',
+        in: 'query',
+        required: false,
+        schema: { type: 'string', enum: Object.values(Denomination) }
+      }
+    ],
+    responses: {
+      '200': {
+        description: 'Matching orders',
+        content: swgMultipleStandingOrdersSchema
+      }
+    }
+  }
+}
 
 type QueryParams = Partial<{
   perPage: number
@@ -41,6 +96,3 @@ export const handleGetFilteredOrders = async (
   })
   res.send(orders)
 }
-
-export const handleGetOrderById = async (req: Request, res: Response) =>
-  res.send(await getSingleStandingOrderDB({ id: req.params.id }))

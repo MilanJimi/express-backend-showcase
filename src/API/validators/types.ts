@@ -1,4 +1,4 @@
-import { Denomination, OrderStatus } from '../../db/requests/types'
+import { Denomination, OrderStatus } from '../../enums'
 
 export type MarketOrderRequest = {
   username: string

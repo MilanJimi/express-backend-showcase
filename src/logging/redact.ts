@@ -1,4 +1,4 @@
-const redactedFields = ['password']
+const redactedFields = ['password', 'accessToken']
 
 // We don't want to log passwords in prod
 export const redactFields = (obj: Record<string, unknown>) => {

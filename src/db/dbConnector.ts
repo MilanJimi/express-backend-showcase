@@ -5,7 +5,7 @@ dotenv.config()
 export const dbConfig = {
   client: 'pg',
   connection: process.env.DB_CONNECTION,
-  pool: { min: 10, max: 19 },
+  pool: { min: 0, max: 19 },
   migrations: {
     directory: './migrations'
   }

@@ -16,5 +16,6 @@ export enum ErrorCode {
   orderCancelled = 'ERROR_ORDER_CANCELLED',
   orderSmallerThanAmount = 'ERROR_ORDER_SMALLER_THAN_AMOUNT',
   insufficientBalance = 'ERROR_INSUFFICIENT_BALANCE',
+  unauthorized = 'ERROR_UNAUTHORIZED',
   unknown = 'ERROR_UNKNOWN'
 }

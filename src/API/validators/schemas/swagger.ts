@@ -12,8 +12,8 @@ const standingOrderSchema = Joi.object({
   id: Joi.string(),
   username: Joi.string(),
   status: Joi.string().valid(OrderStatus),
-  sell_denomination: Joi.string().valid(Denomination),
-  buy_denomination: Joi.string().valid(Denomination),
+  sell_denomination: Joi.string().valid(...Object.values(Denomination)),
+  buy_denomination: Joi.string().valid(...Object.values(Denomination)),
   limit_price: Joi.number(),
   quantity_original: Joi.number(),
   quantity_outstanding: Joi.number()

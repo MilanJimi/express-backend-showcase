@@ -1,7 +1,7 @@
 import supertest from 'supertest'
 
-import { app } from '../../../../server'
-import { ErrorCode } from '../../../../../enums'
+import { app } from '../../../server'
+import { ErrorCode } from '../../../../enums'
 import { db } from '@db/database'
 
 jest.mock('@db/requests/user')

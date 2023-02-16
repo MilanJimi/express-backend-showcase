@@ -9,8 +9,8 @@ import {
 const allowedStatusUpdates = [OrderStatus.live, OrderStatus.cancelled]
 
 export const baseOrderFieldsSchema = {
-  sellDenomination: Joi.string().valid(Denomination),
-  buyDenomination: Joi.string().valid(Denomination),
+  sellDenomination: Joi.string().valid(...Object.values(Denomination)),
+  buyDenomination: Joi.string().valid(...Object.values(Denomination)),
   amount: Joi.number()
 }
 

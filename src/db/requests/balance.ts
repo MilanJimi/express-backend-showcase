@@ -1,3 +1,5 @@
+import { BalanceRequest } from '@api/validators/types'
+import { db } from '@db/database'
 import { UserFacingError } from '@utils/error'
 import { Knex } from 'knex'
 
@@ -66,6 +68,20 @@ const upsertBalance = async (
       ])
     })
 
+const updateBalance = async ({
+  username,
+  denomination,
+  amount
+}: BalanceRequest) => {
+  return dbClient.transaction((trx) =>
+    upsertBalance(trx, {
+      username,
+      denomination,
+      amount
+    })
+  )
+}
+
 const putMoneyOnHold = async (
   trx: Knex.Transaction,
   { username, denomination, amount }: PutMoneyOnHoldParams
@@ -120,6 +136,7 @@ export const balanceDbQueries = {
   getSingleBalance,
   adjustAvailableBalance,
   upsertBalance,
+  updateBalance,
   putMoneyOnHold,
   transferBalance
 }

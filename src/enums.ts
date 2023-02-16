@@ -17,5 +17,6 @@ export enum ErrorCode {
   orderSmallerThanAmount = 'ERROR_ORDER_SMALLER_THAN_AMOUNT',
   insufficientBalance = 'ERROR_INSUFFICIENT_BALANCE',
   unauthorized = 'ERROR_UNAUTHORIZED',
-  unknown = 'ERROR_UNKNOWN'
+  unknown = 'ERROR_UNKNOWN',
+  userAlreadyExists = 'ERROR_ALREADY_REGISTERED'
 }

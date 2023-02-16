@@ -3,6 +3,8 @@ import { Request, Response } from 'express'
 import joiToSwagger from 'joi-to-swagger'
 
 import { db } from '../../../../db/database'
+import { ErrorCode } from '../../../../enums'
+import { UserFacingError } from '../../../utils/error'
 import { validateUser } from '../../../validators/userValidator'
 
 export const swgRegister = {
@@ -28,7 +30,7 @@ export const handleRegister = async (req: Request, res: Response) => {
   const { error, value } = validateUser.new.validate(req.body)
   if (error) return res.status(400).send(error)
   if ((await db.getUser(value.username)).length > 0)
-    return res.status(409).send(`User "${value.username}" already registered`)
+    throw new UserFacingError(ErrorCode.userAlreadyExists, 409)
 
   const passwordHash = await bcrypt.hash(value.password, 10)
   await db.saveUser(value.username, passwordHash)

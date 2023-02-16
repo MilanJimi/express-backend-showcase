@@ -5,6 +5,8 @@ import jwt from 'jsonwebtoken'
 
 import { config } from '../../../../config/config'
 import { db } from '../../../../db/database'
+import { ErrorCode } from '../../../../enums'
+import { UserFacingError } from '../../../utils/error'
 import { swgAuthTokenSchema } from '../../../validators/schemas/swagger'
 import { validateUser } from '../../../validators/userValidator'
 
@@ -35,11 +37,12 @@ export const handleLogin = async (req: Request, res: Response) => {
   const { username, password } = value
 
   const dbUsers = await db.getUser(value.username)
-  if (dbUsers.length !== 1) return res.sendStatus(401)
+  if (dbUsers.length !== 1)
+    throw new UserFacingError(ErrorCode.unauthorized, 401)
 
   if (await bcrypt.compare(password, dbUsers[0].password)) {
     const accessToken = jwt.sign(username, config.accessTokenSecret)
     return res.json({ accessToken })
   }
-  return res.sendStatus(401)
+  throw new UserFacingError(ErrorCode.unauthorized, 401)
 }

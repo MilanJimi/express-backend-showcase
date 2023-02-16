@@ -1,7 +1,8 @@
-import { dbClient } from '../../../../db/client'
-import { db } from '../../../../db/database'
+import { dbClient } from '@db/client'
+import { db } from '@db/database'
+import { UserFacingError } from '@utils/error'
+
 import { ErrorCode } from '../../../../enums'
-import { UserFacingError } from '../../../utils/error'
 import { BalanceRequest } from '../../../validators/balanceValidator'
 
 const updateBalance = async ({

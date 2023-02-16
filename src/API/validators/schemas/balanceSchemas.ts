@@ -1,5 +1,6 @@
+import { Balance } from '@db/requests/types'
 import Joi from 'joi'
-import { Balance } from '../../../db/requests/types'
+
 import { Denomination } from '../../../enums'
 import { BalanceRequest } from '../types'
 

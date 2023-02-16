@@ -1,7 +1,8 @@
-import { Pagination } from '../../API/utils/pagination'
-import { UpdateStandingOrderRequest } from '../../API/validators/types'
+import { Pagination } from '@api/utils/pagination'
+import { UpdateStandingOrderRequest } from '@api/validators/types'
+
+import { Denomination, OrderStatus } from '../../enums'
 import { OrderByParam } from '../types'
-import { OrderStatus, Denomination } from '../../enums'
 
 export type StandingOrder = {
   id: string

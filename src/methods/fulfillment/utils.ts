@@ -1,6 +1,8 @@
-import { OrderFulfillment } from './types'
+import { db } from '@db/database'
 import { Knex } from 'knex'
-import { db } from '../../db/database'
+
+import { OrderFulfillment } from './types'
+
 export const getAveragePrice = (orders: OrderFulfillment[]) => {
   const bought = orders.reduce(
     (bought, { amount, order }) => bought + amount / order.limit_price,

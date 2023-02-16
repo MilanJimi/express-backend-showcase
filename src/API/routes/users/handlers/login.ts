@@ -1,12 +1,12 @@
+import { config } from '@config/config'
+import { db } from '@db/database'
+import { UserFacingError } from '@utils/error'
 import bcrypt from 'bcrypt'
 import { Request, Response } from 'express'
 import joiToSwagger from 'joi-to-swagger'
 import jwt from 'jsonwebtoken'
 
-import { config } from '../../../../config/config'
-import { db } from '../../../../db/database'
 import { ErrorCode } from '../../../../enums'
-import { UserFacingError } from '../../../utils/error'
 import { swgAuthTokenSchema } from '../../../validators/schemas/swagger'
 import { validateUser } from '../../../validators/userValidator'
 

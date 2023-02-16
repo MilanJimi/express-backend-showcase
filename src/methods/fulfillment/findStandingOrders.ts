@@ -1,6 +1,7 @@
-import { dateOrderParams } from '../../db/common/sorting'
-import { db } from '../../db/database'
-import { standingOrderSorting } from '../../db/requests/standingOrders'
+import { dateOrderParams } from '@db/common/sorting'
+import { db } from '@db/database'
+import { standingOrderSorting } from '@db/requests/standingOrders'
+
 import { OrderStatus } from '../../enums'
 import {
   CheapStandingOrders,

@@ -1,10 +1,10 @@
+import { catchExceptions } from '@api/utils/errorHandler'
 import express from 'express'
 
 import { authenticate } from '../../middleware/authenticate'
-import { catchExceptions } from '../../utils/errorHandler'
-import { handleWithdraw, swgWithdraw } from './handlers/withdraw'
-import { handleTopup, swgTopup } from './handlers/topup'
 import { handleGetBalance, swgGetBalance } from './handlers/getBalance'
+import { handleTopup, swgTopup } from './handlers/topup'
+import { handleWithdraw, swgWithdraw } from './handlers/withdraw'
 
 export const swgBalanceRouter = {
   '/balance': swgGetBalance,

@@ -1,14 +1,15 @@
+import { UserFacingError } from '@utils/error'
 import { Knex } from 'knex'
-import { UserFacingError } from '../../API/utils/error'
+
+import { Denomination, ErrorCode } from '../../enums'
 import { dbClient } from '../client'
 import {
   Balance,
   GetBalanceFilters,
-  UpsertBalanceParams,
   PutMoneyOnHoldParams,
-  TransferBalanceParams
+  TransferBalanceParams,
+  UpsertBalanceParams
 } from './types'
-import { Denomination, ErrorCode } from '../../enums'
 
 const balanceColumns = [
   'user_balances.id',

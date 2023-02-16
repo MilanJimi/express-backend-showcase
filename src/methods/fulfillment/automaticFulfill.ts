@@ -1,5 +1,6 @@
-import { dbClient } from '../../db/client'
-import { db } from '../../db/database'
+import { dbClient } from '@db/client'
+import { db } from '@db/database'
+
 import { log } from '../../logging/logger'
 import { findAutofulfillStandingOrders } from './findStandingOrders'
 import { FindStandingOrdersParams, OrderFulfillment } from './types'

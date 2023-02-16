@@ -1,11 +1,11 @@
 import supertest from 'supertest'
 
 import { app } from '../../../../server'
-import { db } from '../../../../../db/database'
 import { ErrorCode } from '../../../../../enums'
+import { db } from '@db/database'
 
-jest.mock('../../../../../db/requests/user')
-jest.mock('../../../../../db/database')
+jest.mock('@db/requests/user')
+jest.mock('@db/database')
 
 describe('User management', () => {
   beforeEach(async () => {

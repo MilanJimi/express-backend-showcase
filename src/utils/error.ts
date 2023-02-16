@@ -1,4 +1,4 @@
-import { ErrorCode } from '../../enums'
+import { ErrorCode } from '../enums'
 
 export class UserFacingError extends Error {
   userFacingMessage: ErrorCode

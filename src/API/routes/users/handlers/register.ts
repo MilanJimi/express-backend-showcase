@@ -1,10 +1,10 @@
+import { db } from '@db/database'
+import { UserFacingError } from '@utils/error'
 import bcrypt from 'bcrypt'
 import { Request, Response } from 'express'
 import joiToSwagger from 'joi-to-swagger'
 
-import { db } from '../../../../db/database'
 import { ErrorCode } from '../../../../enums'
-import { UserFacingError } from '../../../utils/error'
 import { validateUser } from '../../../validators/userValidator'
 
 export const swgRegister = {

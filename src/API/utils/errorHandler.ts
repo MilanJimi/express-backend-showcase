@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
+
 import { ErrorCode } from '../../enums'
 import { log } from '../../logging/logger'
-import { UserFacingError } from './error'
+import { UserFacingError } from '../../utils/error'
 
 type PromiseFunction = (
   req: Request,

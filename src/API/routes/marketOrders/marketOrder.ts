@@ -1,7 +1,7 @@
+import { catchExceptions } from '@api/utils/errorHandler'
 import express from 'express'
 
 import { authenticate } from '../../middleware/authenticate'
-import { catchExceptions } from '../../utils/errorHandler'
 import {
   handleNewMarketOrder,
   swgNewMarketOrder

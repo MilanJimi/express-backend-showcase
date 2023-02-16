@@ -1,18 +1,18 @@
+import { StandingOrderRequest } from '@api/validators/types'
+import { buildOrdering } from '@db/utils/sorting'
+import { UserFacingError } from '@utils/error'
+import { filterNil } from '@utils/objectUtils'
 import { Knex } from 'knex'
 
-import { UserFacingError } from '../../API/utils/error'
-import { StandingOrderRequest } from '../../API/validators/types'
-import { filterNil } from '../../utils/objectUtils'
+import { ErrorCode, OrderStatus } from '../../enums'
 import { dbClient } from '../client'
-import { buildOrdering } from '../utils/sorting'
+import { db } from '../database'
 import {
   FulfillOrderParams,
   GetOrderFilter,
   StandingOrder,
   UpdateStandingOrderParams
 } from './types'
-import { ErrorCode, OrderStatus } from '../../enums'
-import { db } from '../database'
 
 const orderColumns = [
   'standing_orders.id',

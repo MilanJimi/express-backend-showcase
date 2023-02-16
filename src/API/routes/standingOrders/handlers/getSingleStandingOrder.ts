@@ -1,5 +1,5 @@
+import { db } from '@db/database'
 import { Request, Response } from 'express'
-import { db } from '../../../../db/database'
 
 import { swgStandingOrderSchema } from '../../../validators/schemas/swagger'
 

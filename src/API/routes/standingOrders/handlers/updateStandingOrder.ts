@@ -1,17 +1,18 @@
+import { db } from '@db/database'
+import { StandingOrder } from '@db/requests/types'
+import { UserFacingError } from '@utils/error'
 import { Request, Response } from 'express'
-
-import { validateStandingOrder } from '../../../validators/standingOrderValidator'
-import { StandingOrder } from '../../../../db/requests/types'
-import { Denomination, ErrorCode, OrderStatus } from '../../../../enums'
-import { UserFacingError } from '../../../utils/error'
-import { UpdateStandingOrderRequest } from '../../../validators/types'
-import { log } from '../../../../logging/logger'
 import joiToSwagger from 'joi-to-swagger'
+
+import { Denomination, ErrorCode, OrderStatus } from '../../../../enums'
+import { log } from '../../../../logging/logger'
 import {
   swgOkMessageSchema,
   userFacingErrorSchema
 } from '../../../validators/schemas/swagger'
-import { db } from '../../../../db/database'
+import { validateStandingOrder } from '../../../validators/standingOrderValidator'
+import { UpdateStandingOrderRequest } from '../../../validators/types'
+
 export const swgUpdateStandingOrder = {
   put: {
     summary: 'Update own standing order - if balance is sufficient',

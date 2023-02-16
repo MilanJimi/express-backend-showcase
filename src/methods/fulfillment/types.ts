@@ -1,4 +1,5 @@
-import { StandingOrder } from '../../db/requests/types'
+import { StandingOrder } from '@db/requests/types'
+
 import { Denomination } from '../../enums'
 
 export type OrderFulfillment = { order: StandingOrder; amount: number }

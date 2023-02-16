@@ -1,9 +1,9 @@
+import { db } from '@db/database'
+import { UserFacingError } from '@utils/error'
 import { Request, Response } from 'express'
 import joiToSwagger from 'joi-to-swagger'
-import { db } from '../../../../db/database'
 
 import { ErrorCode, OrderStatus } from '../../../../enums'
-import { UserFacingError } from '../../../utils/error'
 import {
   swgOkMessageSchema,
   userFacingErrorSchema

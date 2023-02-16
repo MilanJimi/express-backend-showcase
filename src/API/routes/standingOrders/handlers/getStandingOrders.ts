@@ -1,8 +1,8 @@
+import { getPagination } from '@api/utils/pagination'
+import { db } from '@db/database'
 import { Request, Response } from 'express'
-import { db } from '../../../../db/database'
 
 import { Denomination, OrderStatus } from '../../../../enums'
-import { getPagination } from '../../../utils/pagination'
 import { swgMultipleStandingOrdersSchema } from '../../../validators/schemas/swagger'
 
 export const swgGetStandingOrders = {

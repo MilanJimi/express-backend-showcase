@@ -1,6 +1,6 @@
+import { db } from '@db/database'
 import { Request, Response } from 'express'
 import joiToSwagger from 'joi-to-swagger'
-import { db } from '../../../../db/database'
 
 import { balanceSchema } from '../../../validators/schemas/balanceSchemas'
 

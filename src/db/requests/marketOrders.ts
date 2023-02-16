@@ -1,6 +1,6 @@
+import { MarketOrderRequest } from '@api/validators/types'
 import { Knex } from 'knex'
 
-import { MarketOrderRequest } from '../../API/validators/types'
 import { MarketOrder } from './types'
 
 const insertMarketOrder = async (

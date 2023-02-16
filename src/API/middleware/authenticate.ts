@@ -1,8 +1,9 @@
+import { config } from '@config/config'
+import { UserFacingError } from '@utils/error'
 import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
-import { config } from '../../config/config'
+
 import { ErrorCode } from '../../enums'
-import { UserFacingError } from '../utils/error'
 
 export type AuthenticatedRequest<T = Request> = T & {
   user: string

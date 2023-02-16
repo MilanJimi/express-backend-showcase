@@ -1,13 +1,8 @@
 import { Request, Response } from 'express'
 
 import { validateStandingOrder } from '../../../validators/standingOrderValidator'
-import {
-  getSingleStandingOrderDB,
-  updateSingleStandingOrderDB
-} from '../../../../db/requests/standingOrders'
 import { StandingOrder } from '../../../../db/requests/types'
 import { Denomination, ErrorCode, OrderStatus } from '../../../../enums'
-import { getSingleBalanceDB } from '../../../../db/requests/balance'
 import { UserFacingError } from '../../../utils/error'
 import { UpdateStandingOrderRequest } from '../../../validators/types'
 import { log } from '../../../../logging/logger'
@@ -16,6 +11,7 @@ import {
   swgOkMessageSchema,
   userFacingErrorSchema
 } from '../../../validators/schemas/swagger'
+import { db } from '../../../../db/database'
 export const swgUpdateStandingOrder = {
   put: {
     summary: 'Update own standing order - if balance is sufficient',
@@ -98,7 +94,7 @@ const checkEnoughBalance = async ({
   denomination,
   adjustment
 }: CheckEnoughBalanceParams) => {
-  const balance = await getSingleBalanceDB({ denomination, username })
+  const balance = await db.getSingleBalance({ denomination, username })
   if (!balance || adjustment > balance.available_balance)
     throw new UserFacingError(ErrorCode.insufficientBalance)
 }
@@ -112,7 +108,7 @@ export const handleUpdateStandingOrder = async (
 
   const { username, newAmount, newLimitPrice, status: newStatus } = value
   const { id } = req.params
-  const order = await getSingleStandingOrderDB({ id })
+  const order = await db.getSingleStandingOrder({ id })
 
   if (!order) throw new UserFacingError(ErrorCode.orderNotFound, 404)
   if (order.username !== value.username) return res.sendStatus(401)
@@ -136,7 +132,7 @@ export const handleUpdateStandingOrder = async (
       adjustment
     })
 
-  await updateSingleStandingOrderDB(id, {
+  await db.updateSingleStandingOrder(id, {
     ...value,
     denomination: order.sell_denomination,
     balanceAdjustment: adjustment

@@ -1,6 +1,5 @@
-import { db } from '../../db/dbConnector'
-import { insertMarketOrderDB } from '../../db/requests/marketOrders'
-import { createNewStandingOrder } from '../../db/requests/standingOrders'
+import { dbClient } from '../../db/client'
+import { db } from '../../db/database'
 import { log } from '../../logging/logger'
 import { findAutofulfillStandingOrders } from './findStandingOrders'
 import { FindStandingOrdersParams, OrderFulfillment } from './types'
@@ -24,7 +23,7 @@ export const automaticFulfillOrder = async (
   )
   const averagePrice = getAveragePrice(orders)
 
-  const order = await db.transaction(async (trx) => {
+  const order = await dbClient.transaction(async (trx) => {
     const fulfillOrdersFunctions = standingOrdersToPromises(
       username,
       trx,
@@ -32,12 +31,12 @@ export const automaticFulfillOrder = async (
     )
     const newOrderPromise =
       orderParams.type === 'STANDING'
-        ? createNewStandingOrder(trx, {
+        ? db.createNewStandingOrder(trx, {
             ...orderParams,
             username,
             outstandingAmount
           })
-        : insertMarketOrderDB(
+        : db.insertMarketOrder(
             trx,
             {
               username,

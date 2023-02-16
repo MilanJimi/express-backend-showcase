@@ -1,8 +1,6 @@
 import { dateOrderParams } from '../../db/common/sorting'
-import {
-  getStandingOrdersDB,
-  standingOrderSorting
-} from '../../db/requests/standingOrders'
+import { db } from '../../db/database'
+import { standingOrderSorting } from '../../db/requests/standingOrders'
 import { OrderStatus } from '../../enums'
 import {
   CheapStandingOrders,
@@ -16,7 +14,7 @@ export const findAutofulfillStandingOrders = async (
   const { buyDenomination, sellDenomination, amount } = params
 
   // Get all reverse orders which are cheaper
-  const cheaperOrders = await getStandingOrdersDB({
+  const cheaperOrders = await db.getStandingOrders({
     buyDenomination: sellDenomination,
     sellDenomination: buyDenomination,
     status: OrderStatus.live,

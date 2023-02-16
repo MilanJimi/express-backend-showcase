@@ -4,7 +4,7 @@ import joiToSwagger from 'joi-to-swagger'
 import jwt from 'jsonwebtoken'
 
 import { config } from '../../../../config/config'
-import { getUserDB } from '../../../../db/requests/user'
+import { db } from '../../../../db/database'
 import { swgAuthTokenSchema } from '../../../validators/schemas/swagger'
 import { validateUser } from '../../../validators/userValidator'
 
@@ -34,7 +34,7 @@ export const handleLogin = async (req: Request, res: Response) => {
 
   const { username, password } = value
 
-  const dbUsers = await getUserDB(value.username)
+  const dbUsers = await db.getUser(value.username)
   if (dbUsers.length !== 1) return res.sendStatus(401)
 
   if (await bcrypt.compare(password, dbUsers[0].password)) {

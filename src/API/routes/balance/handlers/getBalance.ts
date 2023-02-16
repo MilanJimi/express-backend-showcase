@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import joiToSwagger from 'joi-to-swagger'
+import { db } from '../../../../db/database'
 
-import { getBalancesDB } from '../../../../db/requests/balance'
 import { balanceSchema } from '../../../validators/schemas/balanceSchemas'
 
 export const swgGetBalance = {
@@ -23,6 +23,6 @@ export const swgGetBalance = {
 
 export const handleGetBalance = async (req: Request, res: Response) => {
   const username = req.body.username as string
-  const balances = await getBalancesDB(username)
+  const balances = await db.getBalances(username)
   return res.send(balances)
 }

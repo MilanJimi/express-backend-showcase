@@ -11,4 +11,4 @@ export const dbConfig = {
   }
 }
 
-export const db = knex(dbConfig)
+export const dbClient = knex(dbConfig)

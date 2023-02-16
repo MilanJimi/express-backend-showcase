@@ -1,8 +1,4 @@
-import { db } from '../dbConnector'
-
-export const saveUserDB = async (username: string, password: string) => {
-  await db('users').insert({ username, password })
-}
+import { dbClient } from '../client'
 
 const usersColumns = ['users.username', 'users.password']
 type UsersDb = {
@@ -10,5 +6,14 @@ type UsersDb = {
   password: string
 }
 
-export const getUserDB = async (username: string) =>
-  db('users').select<UsersDb[]>(usersColumns).where({ username })
+const saveUser = async (username: string, password: string) => {
+  await dbClient('users').insert({ username, password })
+}
+
+const getUser = async (username: string) =>
+  dbClient('users').select<UsersDb[]>(usersColumns).where({ username })
+
+export const userDbQueries = {
+  saveUser,
+  getUser
+}

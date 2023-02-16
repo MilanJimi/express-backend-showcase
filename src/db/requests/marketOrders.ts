@@ -3,7 +3,7 @@ import { Knex } from 'knex'
 import { MarketOrderRequest } from '../../API/validators/types'
 import { MarketOrder } from './types'
 
-export const insertMarketOrderDB = async (
+const insertMarketOrder = async (
   trx: Knex.Transaction,
   { username, sellDenomination, buyDenomination, amount }: MarketOrderRequest,
   rate: number
@@ -19,3 +19,7 @@ export const insertMarketOrderDB = async (
       })
       .returning<MarketOrder[]>('id')
   )[0]
+
+export const marketOrderDbQueries = {
+  insertMarketOrder
+}

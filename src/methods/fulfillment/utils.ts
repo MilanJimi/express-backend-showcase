@@ -1,6 +1,6 @@
 import { OrderFulfillment } from './types'
 import { Knex } from 'knex'
-import { fulfillOrderDB } from '../../db/requests/standingOrders'
+import { db } from '../../db/database'
 export const getAveragePrice = (orders: OrderFulfillment[]) => {
   const bought = orders.reduce(
     (bought, { amount, order }) => bought + amount / order.limit_price,
@@ -17,6 +17,6 @@ export const standingOrdersToPromises = (
 ) =>
   orders
     ? orders.map(({ order, amount }) =>
-        fulfillOrderDB({ order, buyerUsername, amount }, trx)
+        db.fulfillOrder({ order, buyerUsername, amount }, trx)
       )
     : []

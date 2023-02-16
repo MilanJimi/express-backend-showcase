@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
+import { db } from '../../../../db/database'
 
-import { getStandingOrdersDB } from '../../../../db/requests/standingOrders'
 import { Denomination, OrderStatus } from '../../../../enums'
 import { getPagination } from '../../../utils/pagination'
 import { swgMultipleStandingOrdersSchema } from '../../../validators/schemas/swagger'
@@ -86,7 +86,7 @@ export const handleGetFilteredOrders = async (
     page
   } = req.query
   const pagination = getPagination(perPage, page)
-  const orders = await getStandingOrdersDB({
+  const orders = await db.getStandingOrders({
     id,
     username,
     status,

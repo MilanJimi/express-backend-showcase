@@ -1,8 +1,5 @@
-import { db } from '../../../../db/dbConnector'
-import {
-  getSingleBalanceDB,
-  upsertBalanceDB
-} from '../../../../db/requests/balance'
+import { dbClient } from '../../../../db/client'
+import { db } from '../../../../db/database'
 import { ErrorCode } from '../../../../enums'
 import { UserFacingError } from '../../../utils/error'
 import { BalanceRequest } from '../../../validators/balanceValidator'
@@ -12,8 +9,8 @@ const updateBalance = async ({
   denomination,
   amount
 }: BalanceRequest) => {
-  return db.transaction((trx) =>
-    upsertBalanceDB(trx, {
+  return dbClient.transaction((trx) =>
+    db.upsertBalance(trx, {
       username,
       denomination,
       amount
@@ -33,7 +30,7 @@ export const withdraw = async ({
   denomination,
   amount
 }: BalanceRequest) => {
-  const currentBalance = await getSingleBalanceDB({
+  const currentBalance = await db.getSingleBalance({
     username,
     denomination
   })

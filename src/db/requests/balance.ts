@@ -1,6 +1,6 @@
 import { Knex } from 'knex'
 import { UserFacingError } from '../../API/utils/error'
-import { db } from '../dbConnector'
+import { dbClient } from '../client'
 import {
   Balance,
   GetBalanceFilters,
@@ -18,18 +18,18 @@ const balanceColumns = [
   'user_balances.available_balance'
 ]
 
-export const getBalancesDB = async (username: string) =>
-  db('public.user_balances')
+const getBalances = async (username: string) =>
+  dbClient('public.user_balances')
     .select<Balance[]>(balanceColumns)
     .where({ username })
 
-export const getSingleBalanceDB = async (filters: GetBalanceFilters) =>
-  db('public.user_balances')
+const getSingleBalance = async (filters: GetBalanceFilters) =>
+  dbClient('public.user_balances')
     .select<Balance[]>(balanceColumns)
     .where(filters)
     .first()
 
-export const adjustAvailableBalance = async (
+const adjustAvailableBalance = async (
   trx: Knex.Transaction,
   username: string,
   denomination: Denomination,
@@ -40,7 +40,7 @@ export const adjustAvailableBalance = async (
     .where({ username, denomination })
     .returning<Balance[]>(balanceColumns)
 
-export const upsertBalanceDB = async (
+const upsertBalance = async (
   trx: Knex.Transaction,
   {
     username,
@@ -65,11 +65,11 @@ export const upsertBalanceDB = async (
       ])
     })
 
-export const putMoneyOnHoldDB = async (
+const putMoneyOnHold = async (
   trx: Knex.Transaction,
   { username, denomination, amount }: PutMoneyOnHoldParams
 ) => {
-  const currentBalance = await getSingleBalanceDB({
+  const currentBalance = await getSingleBalance({
     username,
     denomination
   })
@@ -78,7 +78,7 @@ export const putMoneyOnHoldDB = async (
   return await adjustAvailableBalance(trx, username, denomination, -amount)
 }
 
-export const transferBalance = async (
+const transferBalance = async (
   trx: Knex.Transaction,
   {
     buyerUsername,
@@ -91,25 +91,34 @@ export const transferBalance = async (
   }: TransferBalanceParams
 ) =>
   Promise.all([
-    upsertBalanceDB(trx, {
+    upsertBalance(trx, {
       username: buyerUsername,
       denomination: sellDenomination,
       amount: buyAmount
     }),
-    upsertBalanceDB(trx, {
+    upsertBalance(trx, {
       username: sellerUsername,
       denomination: sellDenomination,
       amount: -buyAmount,
       skipAvailableBalanceUpdate: isFromHeldBalance
     }),
-    upsertBalanceDB(trx, {
+    upsertBalance(trx, {
       username: buyerUsername,
       denomination: buyDenomination,
       amount: -sellAmount
     }),
-    upsertBalanceDB(trx, {
+    upsertBalance(trx, {
       username: sellerUsername,
       denomination: buyDenomination,
       amount: sellAmount
     })
   ])
+
+export const balanceDbQueries = {
+  getBalances,
+  getSingleBalance,
+  adjustAvailableBalance,
+  upsertBalance,
+  putMoneyOnHold,
+  transferBalance
+}

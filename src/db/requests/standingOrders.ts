@@ -3,14 +3,8 @@ import { Knex } from 'knex'
 import { UserFacingError } from '../../API/utils/error'
 import { StandingOrderRequest } from '../../API/validators/types'
 import { filterNil } from '../../utils/objectUtils'
-import { db } from '../dbConnector'
+import { dbClient } from '../client'
 import { buildOrdering } from '../utils/sorting'
-import {
-  adjustAvailableBalance,
-  getSingleBalanceDB,
-  putMoneyOnHoldDB,
-  transferBalance
-} from './balance'
 import {
   FulfillOrderParams,
   GetOrderFilter,
@@ -18,6 +12,7 @@ import {
   UpdateStandingOrderParams
 } from './types'
 import { ErrorCode, OrderStatus } from '../../enums'
+import { db } from '../database'
 
 const orderColumns = [
   'standing_orders.id',
@@ -34,7 +29,7 @@ export const standingOrderSorting = {
   priceDesc: { column: 'limit_price', direction: 'desc' }
 } as const
 
-export const getStandingOrdersDB = async ({
+const getStandingOrders = async ({
   id,
   username,
   status,
@@ -45,7 +40,7 @@ export const getStandingOrdersDB = async ({
   perPage,
   orderBy
 }: GetOrderFilter) =>
-  db('public.standing_orders')
+  dbClient('public.standing_orders')
     .where(
       filterNil({
         id,
@@ -63,7 +58,7 @@ export const getStandingOrdersDB = async ({
     })
     .select<StandingOrder[]>(orderColumns)
 
-export const updateSingleStandingOrderDB = async (
+const updateSingleStandingOrder = async (
   id: string,
   {
     username,
@@ -73,7 +68,7 @@ export const updateSingleStandingOrderDB = async (
     balanceAdjustment
   }: UpdateStandingOrderParams
 ) =>
-  db.transaction(async (trx) => {
+  dbClient.transaction(async (trx) => {
     const [{ sell_denomination }] = await trx('public.standing_orders')
       .where({ id })
       .update(
@@ -85,7 +80,7 @@ export const updateSingleStandingOrderDB = async (
       )
       .returning('sell_denomination')
     if (balanceAdjustment) {
-      await adjustAvailableBalance(
+      await db.adjustAvailableBalance(
         trx,
         username,
         sell_denomination,
@@ -94,13 +89,13 @@ export const updateSingleStandingOrderDB = async (
     }
   })
 
-export const getSingleStandingOrderDB = async (filters: GetOrderFilter) =>
-  db('public.standing_orders')
+const getSingleStandingOrder = async (filters: GetOrderFilter) =>
+  dbClient('public.standing_orders')
     .select<StandingOrder[]>(orderColumns)
     .where(filters)
     .first()
 
-export const insertStandingOrderDB = async (
+const insertStandingOrder = async (
   trx: Knex.Transaction,
   {
     username,
@@ -128,7 +123,7 @@ export const insertStandingOrderDB = async (
       .returning<StandingOrder[]>(orderColumns)
   )[0]
 
-const subtractAmountFromStandingOrderDB = async (
+const subtractAmountFromStandingOrder = async (
   trx: Knex.Transaction,
   id: string,
   amount: number
@@ -138,7 +133,7 @@ const subtractAmountFromStandingOrderDB = async (
     .andWhere('quantity_outstanding', '>=', amount)
     .decrement('quantity_outstanding', amount)
 
-const setStatusFulfilledIfZeroOutstandingDB = (
+const setStatusFulfilledIfZeroOutstanding = (
   trx: Knex.Transaction,
   id: string
 ) =>
@@ -147,21 +142,21 @@ const setStatusFulfilledIfZeroOutstandingDB = (
     .andWhere('quantity_outstanding', '=', 0)
     .update('status', OrderStatus.fulfilled)
 
-export const fulfillOrderDB = async (
+const fulfillOrder = async (
   { order, buyerUsername, amount }: FulfillOrderParams,
   trx?: Knex.Transaction
 ) => {
-  const currentBalance = await getSingleBalanceDB({
+  const currentBalance = await db.getSingleBalance({
     username: buyerUsername,
     denomination: order.buy_denomination
   })
   if (!currentBalance || currentBalance.available_balance < amount)
     throw new UserFacingError(ErrorCode.insufficientBalance)
 
-  await (trx ?? db).transaction(async (trx) => {
+  await (trx ?? dbClient).transaction(async (trx) => {
     await Promise.all([
-      subtractAmountFromStandingOrderDB(trx, order.id, amount),
-      transferBalance(trx, {
+      subtractAmountFromStandingOrder(trx, order.id, amount),
+      db.transferBalance(trx, {
         buyerUsername,
         sellerUsername: order.username,
         buyDenomination: order.buy_denomination,
@@ -171,20 +166,29 @@ export const fulfillOrderDB = async (
         isFromHeldBalance: true
       })
     ])
-    await setStatusFulfilledIfZeroOutstandingDB(trx, order.id)
+    await setStatusFulfilledIfZeroOutstanding(trx, order.id)
   })
 }
 
-export const createNewStandingOrder = (
+const createNewStandingOrder = (
   trx: Knex.Transaction,
   params: StandingOrderRequest
 ) =>
   trx.transaction(async (trx) => {
-    await putMoneyOnHoldDB(trx, {
+    await db.putMoneyOnHold(trx, {
       username: params.username,
       amount: params.outstandingAmount ?? params.amount,
       denomination: params.sellDenomination
     })
-    const response = await insertStandingOrderDB(trx, params)
+    const response = await insertStandingOrder(trx, params)
     return response
   })
+
+export const standingOrderDbQueries = {
+  getStandingOrders,
+  updateSingleStandingOrder,
+  getSingleStandingOrder,
+  insertStandingOrder,
+  fulfillOrder,
+  createNewStandingOrder
+}

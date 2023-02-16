@@ -1,3 +1,3 @@
-import { dbConfig } from './src/db/dbConnector'
+import { dbConfig } from './src/db/client'
 
 export default dbConfig

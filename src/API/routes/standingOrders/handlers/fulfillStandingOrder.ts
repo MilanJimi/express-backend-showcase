@@ -1,11 +1,7 @@
 import { Request, Response } from 'express'
 import joiToSwagger from 'joi-to-swagger'
+import { db } from '../../../../db/database'
 
-import { getSingleBalanceDB } from '../../../../db/requests/balance'
-import {
-  fulfillOrderDB,
-  getSingleStandingOrderDB
-} from '../../../../db/requests/standingOrders'
 import { ErrorCode, OrderStatus } from '../../../../enums'
 import { UserFacingError } from '../../../utils/error'
 import {
@@ -59,21 +55,21 @@ const fulfillOrder = async (
   orderId: string,
   { username, amount }: FulfillStandingOrderRequest
 ) => {
-  const order = await getSingleStandingOrderDB({ id: orderId })
+  const order = await db.getSingleStandingOrder({ id: orderId })
   if (!order) throw new UserFacingError(ErrorCode.orderNotFound, 404)
   if (order.status === OrderStatus.fulfilled)
     throw new UserFacingError(ErrorCode.orderFulfilled)
   if (order.quantity_outstanding < amount)
     throw new UserFacingError(ErrorCode.orderSmallerThanAmount)
 
-  const currentBalance = await getSingleBalanceDB({
+  const currentBalance = await db.getSingleBalance({
     username,
     denomination: order.buy_denomination
   })
   if (!currentBalance || currentBalance.available_balance < amount)
     throw new UserFacingError(ErrorCode.insufficientBalance)
 
-  await fulfillOrderDB({ order, buyerUsername: username, amount })
+  await db.fulfillOrder({ order, buyerUsername: username, amount })
 }
 
 export const handleFulfillOrder = async (req: Request, res: Response) => {

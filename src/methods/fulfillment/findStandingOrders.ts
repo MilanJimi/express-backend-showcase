@@ -1,6 +1,7 @@
 import { dateOrderParams } from '@db/common/sorting'
-import { db } from '@db/database'
+import { DB } from '@db/database'
 import { standingOrderSorting } from '@db/requests/standingOrders'
+import { container } from 'tsyringe'
 
 import { OrderStatus } from '../../enums'
 import {
@@ -15,13 +16,15 @@ export const findAutofulfillStandingOrders = async (
   const { buyDenomination, sellDenomination, amount } = params
 
   // Get all reverse orders which are cheaper
-  const cheaperOrders = await db.getStandingOrders({
-    buyDenomination: sellDenomination,
-    sellDenomination: buyDenomination,
-    status: OrderStatus.live,
-    minPrice: params.type === 'STANDING' ? 1 / params.limitPrice : undefined,
-    orderBy: [standingOrderSorting.priceDesc, dateOrderParams.dateAsc]
-  })
+  const cheaperOrders = await container
+    .resolve(DB)
+    .standingOrder.getStandingOrders({
+      buyDenomination: sellDenomination,
+      sellDenomination: buyDenomination,
+      status: OrderStatus.live,
+      minPrice: params.type === 'STANDING' ? 1 / params.limitPrice : undefined,
+      orderBy: [standingOrderSorting.priceDesc, dateOrderParams.dateAsc]
+    })
   if (cheaperOrders.length === 0)
     return { orders: [], outstandingAmount: amount }
 

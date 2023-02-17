@@ -1,7 +1,8 @@
-import { db } from '@db/database'
+import { DB } from '@db/database'
 import { UserFacingError } from '@utils/error'
 import { Request, Response } from 'express'
 import joiToSwagger from 'joi-to-swagger'
+import { container } from 'tsyringe'
 
 import { ErrorCode, OrderStatus } from '../../../../enums'
 import {
@@ -55,21 +56,25 @@ const fulfillOrder = async (
   orderId: string,
   { username, amount }: FulfillStandingOrderRequest
 ) => {
-  const order = await db.getSingleStandingOrder({ id: orderId })
+  const order = await container
+    .resolve(DB)
+    .standingOrder.getSingleStandingOrder({ id: orderId })
   if (!order) throw new UserFacingError(ErrorCode.orderNotFound, 404)
   if (order.status === OrderStatus.fulfilled)
     throw new UserFacingError(ErrorCode.orderFulfilled)
   if (order.quantity_outstanding < amount)
     throw new UserFacingError(ErrorCode.orderSmallerThanAmount)
 
-  const currentBalance = await db.getSingleBalance({
+  const currentBalance = await container.resolve(DB).balance.getSingleBalance({
     username,
     denomination: order.buy_denomination
   })
   if (!currentBalance || currentBalance.available_balance < amount)
     throw new UserFacingError(ErrorCode.insufficientBalance)
 
-  await db.fulfillOrder({ order, buyerUsername: username, amount })
+  await container
+    .resolve(DB)
+    .standingOrder.fulfillOrder({ order, buyerUsername: username, amount })
 }
 
 export const handleFulfillOrder = async (req: Request, res: Response) => {

@@ -1,7 +1,3 @@
-import dotenv from 'dotenv'
-
-dotenv.config()
-
 export const assertIsDefined: <T>(
   val: T,
   name: string

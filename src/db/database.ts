@@ -1,13 +1,16 @@
-import { balanceDbQueries } from './requests/balance'
-import { marketOrderDbQueries } from './requests/marketOrders'
-import { standingOrderDbQueries } from './requests/standingOrders'
-import { userDbQueries } from './requests/user'
+import { singleton } from 'tsyringe'
 
-const db = {
-  ...userDbQueries,
-  ...balanceDbQueries,
-  ...standingOrderDbQueries,
-  ...marketOrderDbQueries
+import { BalanceController } from './requests/balance'
+import { MarketOrderController } from './requests/marketOrders'
+import { StandingOrderController } from './requests/standingOrders'
+import { UserController } from './requests/user'
+
+@singleton()
+export class DB {
+  constructor(
+    public user: UserController,
+    public balance: BalanceController,
+    public marketOrder: MarketOrderController,
+    public standingOrder: StandingOrderController
+  ) {}
 }
-
-export { db }

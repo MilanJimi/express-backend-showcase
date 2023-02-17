@@ -9,6 +9,8 @@
         "@config/*": ["src/config/*"],
         "@utils/*": ["src/utils/*"]
     },
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "resolveJsonModule":true,
     "noEmit":true,
     "esModuleInterop":true,

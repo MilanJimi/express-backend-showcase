@@ -1,5 +1,6 @@
-import { db } from '@db/database'
+import { DB } from '@db/database'
 import { Request, Response } from 'express'
+import { container } from 'tsyringe'
 
 import { swgStandingOrderSchema } from '../../../validators/schemas/swagger'
 
@@ -25,4 +26,8 @@ export const swgGetSingleStandingOrder = {
 }
 
 export const handleGetOrderById = async (req: Request, res: Response) =>
-  res.send(await db.getSingleStandingOrder({ id: req.params.id }))
+  res.send(
+    await container
+      .resolve(DB)
+      .standingOrder.getSingleStandingOrder({ id: req.params.id })
+  )

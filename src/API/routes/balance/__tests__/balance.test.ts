@@ -1,7 +1,8 @@
 import { app } from '@api/server'
-import { db } from '@db/database'
+import { DB } from '@db/database'
 import { Denomination, ErrorCode } from 'src/enums'
 import supertest from 'supertest'
+import { container } from 'tsyringe'
 
 jest.mock('@api/middleware/authenticate')
 jest.mock('@db/requests/balance')
@@ -21,8 +22,8 @@ describe('Balance API tests', () => {
         .send({ amount })
         .expect(200)
       expect(response.body).toStrictEqual({ message: 'OK' })
-      expect(db.updateBalance).toBeCalledTimes(1)
-      expect(db.updateBalance).toBeCalledWith({
+      expect(container.resolve(DB).balance.updateBalance).toBeCalledTimes(1)
+      expect(container.resolve(DB).balance.updateBalance).toBeCalledWith({
         username: 'Mock User',
         denomination,
         amount
@@ -36,8 +37,8 @@ describe('Balance API tests', () => {
         .send({ amount })
         .expect(200)
       expect(response.body).toStrictEqual({ message: 'OK' })
-      expect(db.updateBalance).toBeCalledTimes(1)
-      expect(db.updateBalance).toBeCalledWith({
+      expect(container.resolve(DB).balance.updateBalance).toBeCalledTimes(1)
+      expect(container.resolve(DB).balance.updateBalance).toBeCalledWith({
         username: 'Mock User',
         denomination,
         amount: -amount

@@ -1,8 +1,9 @@
-import { db } from '@db/database'
+import { DB } from '@db/database'
 import { StandingOrder } from '@db/requests/types'
 import { UserFacingError } from '@utils/error'
 import { Request, Response } from 'express'
 import joiToSwagger from 'joi-to-swagger'
+import { container } from 'tsyringe'
 
 import { Denomination, ErrorCode, OrderStatus } from '../../../../enums'
 import { log } from '../../../../logging/logger'
@@ -95,7 +96,9 @@ const checkEnoughBalance = async ({
   denomination,
   adjustment
 }: CheckEnoughBalanceParams) => {
-  const balance = await db.getSingleBalance({ denomination, username })
+  const balance = await container
+    .resolve(DB)
+    .balance.getSingleBalance({ denomination, username })
   if (!balance || adjustment > balance.available_balance)
     throw new UserFacingError(ErrorCode.insufficientBalance)
 }
@@ -109,7 +112,9 @@ export const handleUpdateStandingOrder = async (
 
   const { username, newAmount, newLimitPrice, status: newStatus } = value
   const { id } = req.params
-  const order = await db.getSingleStandingOrder({ id })
+  const order = await container
+    .resolve(DB)
+    .standingOrder.getSingleStandingOrder({ id })
 
   if (!order) throw new UserFacingError(ErrorCode.orderNotFound, 404)
   if (order.username !== value.username) return res.sendStatus(401)
@@ -133,7 +138,7 @@ export const handleUpdateStandingOrder = async (
       adjustment
     })
 
-  await db.updateSingleStandingOrder(id, {
+  await container.resolve(DB).standingOrder.updateSingleStandingOrder(id, {
     ...value,
     denomination: order.sell_denomination,
     balanceAdjustment: adjustment

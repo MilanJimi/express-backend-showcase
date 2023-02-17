@@ -2,7 +2,8 @@ import supertest from 'supertest'
 
 import { app } from '../../../server'
 import { ErrorCode } from '../../../../enums'
-import { db } from '@db/database'
+import { DB } from '@db/database'
+import { container } from 'tsyringe'
 
 jest.mock('@db/requests/user')
 jest.mock('@db/database')
@@ -21,9 +22,9 @@ describe('User management', () => {
       .send({ username, password })
       .expect(409)
     expect(res.body).toEqual({ error: ErrorCode.userAlreadyExists })
-    expect(db.getUser).toBeCalledTimes(1)
-    expect(db.getUser).toBeCalledWith(username)
-    expect(db.saveUser).toBeCalledTimes(0)
+    expect(container.resolve(DB).user.getUser).toBeCalledTimes(1)
+    expect(container.resolve(DB).user.getUser).toBeCalledWith(username)
+    expect(container.resolve(DB).user.saveUser).toBeCalledTimes(0)
   })
 
   test('Login - Success', async () => {
@@ -35,8 +36,8 @@ describe('User management', () => {
       .send({ username, password })
       .expect(200)
     expect(res.body).toMatchObject({ accessToken: expect.stringContaining('') })
-    expect(db.getUser).toBeCalledTimes(1)
-    expect(db.getUser).toBeCalledWith(username)
+    expect(container.resolve(DB).user.getUser).toBeCalledTimes(1)
+    expect(container.resolve(DB).user.getUser).toBeCalledWith(username)
   })
 
   test('Login - Wrong password', async () => {
@@ -51,7 +52,9 @@ describe('User management', () => {
   })
 
   test('Login - Wrong Username', async () => {
-    jest.spyOn(db, 'getUser').mockImplementation(async () => [])
+    jest
+      .spyOn(container.resolve(DB).user, 'getUser')
+      .mockImplementation(async () => [])
     const username = 'New User'
     const password = 'pass'
 
@@ -63,7 +66,9 @@ describe('User management', () => {
   })
 
   test('Register - New user', async () => {
-    jest.spyOn(db, 'getUser').mockImplementation(async () => [])
+    jest
+      .spyOn(container.resolve(DB).user, 'getUser')
+      .mockImplementation(async () => [])
     const username = 'New User'
     const password = 'NewPass'
 
@@ -71,9 +76,9 @@ describe('User management', () => {
       .post('/users/register')
       .send({ username, password })
       .expect(200)
-    expect(db.getUser).toBeCalledTimes(1)
-    expect(db.getUser).toBeCalledWith(username)
-    expect(db.saveUser).toBeCalledWith(
+    expect(container.resolve(DB).user.getUser).toBeCalledTimes(1)
+    expect(container.resolve(DB).user.getUser).toBeCalledWith(username)
+    expect(container.resolve(DB).user.saveUser).toBeCalledWith(
       username,
       expect.stringMatching(new RegExp(`((?!${password}).)*`)) // Does not contain password, just hash
     )

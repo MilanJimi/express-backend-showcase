@@ -1,5 +1,6 @@
 import { dbClient } from '@db/client'
-import { db } from '@db/database'
+import { DB } from '@db/database'
+import { container } from 'tsyringe'
 
 import { log } from '../../logging/logger'
 import { findAutofulfillStandingOrders } from './findStandingOrders'
@@ -32,12 +33,12 @@ export const automaticFulfillOrder = async (
     )
     const newOrderPromise =
       orderParams.type === 'STANDING'
-        ? db.createNewStandingOrder(trx, {
+        ? container.resolve(DB).standingOrder.createNewStandingOrder(trx, {
             ...orderParams,
             username,
             outstandingAmount
           })
-        : db.insertMarketOrder(
+        : container.resolve(DB).marketOrder.insertMarketOrder(
             trx,
             {
               username,

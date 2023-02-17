@@ -1,6 +1,7 @@
 import { getPagination } from '@api/utils/pagination'
-import { db } from '@db/database'
+import { DB } from '@db/database'
 import { Request, Response } from 'express'
+import { container } from 'tsyringe'
 
 import { Denomination, OrderStatus } from '../../../../enums'
 import { swgMultipleStandingOrdersSchema } from '../../../validators/schemas/swagger'
@@ -86,7 +87,7 @@ export const handleGetFilteredOrders = async (
     page
   } = req.query
   const pagination = getPagination(perPage, page)
-  const orders = await db.getStandingOrders({
+  const orders = await container.resolve(DB).standingOrder.getStandingOrders({
     id,
     username,
     status,

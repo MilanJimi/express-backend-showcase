@@ -1,10 +1,11 @@
 import { config } from '@config/config'
-import { db } from '@db/database'
+import { DB } from '@db/database'
 import { UserFacingError } from '@utils/error'
 import bcrypt from 'bcrypt'
 import { Request, Response } from 'express'
 import joiToSwagger from 'joi-to-swagger'
 import jwt from 'jsonwebtoken'
+import { container } from 'tsyringe'
 
 import { ErrorCode } from '../../../../enums'
 import { swgAuthTokenSchema } from '../../../validators/schemas/swagger'
@@ -36,7 +37,7 @@ export const handleLogin = async (req: Request, res: Response) => {
 
   const { username, password } = value
 
-  const dbUsers = await db.getUser(value.username)
+  const dbUsers = await container.resolve(DB).user.getUser(value.username)
   if (dbUsers.length !== 1)
     throw new UserFacingError(ErrorCode.unauthorized, 401)
 

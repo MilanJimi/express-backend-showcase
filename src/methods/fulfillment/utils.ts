@@ -1,5 +1,6 @@
-import { db } from '@db/database'
+import { DB } from '@db/database'
 import { Knex } from 'knex'
+import { container } from 'tsyringe'
 
 import { OrderFulfillment } from './types'
 
@@ -19,6 +20,8 @@ export const standingOrdersToPromises = (
 ) =>
   orders
     ? orders.map(({ order, amount }) =>
-        db.fulfillOrder({ order, buyerUsername, amount }, trx)
+        container
+          .resolve(DB)
+          .standingOrder.fulfillOrder({ order, buyerUsername, amount }, trx)
       )
     : []

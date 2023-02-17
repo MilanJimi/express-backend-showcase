@@ -44,6 +44,7 @@ Then you can send requests with postman, or similar tools. Alternatively, you ca
 - Market Quote (before fulfilling market order)
 
 ### Tech
+- Dependency Injection [WIP]
 - Database population scripts, and tests
 - Docker build
 - Cleanup, refactor (I'm not particularly happy with Market/Standing order interaction)

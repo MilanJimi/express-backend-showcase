@@ -1,10 +1,10 @@
 import { catchExceptions } from '@api/utils/errorHandler'
 import express from 'express'
+import { container } from 'tsyringe'
 
 import { authenticate } from '../../middleware/authenticate'
-import { handleGetBalance, swgGetBalance } from './handlers/getBalance'
-import { handleTopup, swgTopup } from './handlers/topup'
-import { handleWithdraw, swgWithdraw } from './handlers/withdraw'
+import { BalanceHandler } from './handlers/balanceHandler'
+import { swgGetBalance, swgTopup, swgWithdraw } from './handlers/swagger'
 
 export const swgBalanceRouter = {
   '/balance': swgGetBalance,
@@ -15,10 +15,12 @@ export const swgBalanceRouter = {
 const balanceRouter = express()
 balanceRouter.use(authenticate)
 
-balanceRouter.get('/', catchExceptions(handleGetBalance))
+const handler = container.resolve(BalanceHandler)
 
-balanceRouter.post('/topup/:denomination', catchExceptions(handleTopup))
+balanceRouter.get('/', catchExceptions(handler.getBalance))
 
-balanceRouter.post('/withdraw/:denomination', catchExceptions(handleWithdraw))
+balanceRouter.post('/topup/:denomination', catchExceptions(handler.topup))
+
+balanceRouter.post('/withdraw/:denomination', catchExceptions(handler.withdraw))
 
 export { balanceRouter }

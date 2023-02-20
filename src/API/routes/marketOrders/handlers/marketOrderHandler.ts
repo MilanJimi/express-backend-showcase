@@ -2,14 +2,12 @@ import { Request, Response } from 'express'
 import joiToSwagger from 'joi-to-swagger'
 
 import { ErrorCode } from '../../../../enums'
-import { automaticFulfillOrder } from '../../../../methods/fulfillment/automaticFulfill'
-import { OrderType } from '../../../../methods/fulfillment/types'
 import { validateMarketOrder } from '../../../validators/marketOrderValidator'
 import {
   swgOkMessageSchema,
   userFacingErrorSchema
 } from '../../../validators/schemas/swagger'
-import { MarketOrderRequest } from '../../../validators/types'
+import { MarketOrderService } from '../service/marketOrderService'
 
 export const swgNewMarketOrder = {
   post: {
@@ -35,14 +33,13 @@ export const swgNewMarketOrder = {
   }
 }
 
-const newMarketOrder = async (params: MarketOrderRequest) => {
-  await automaticFulfillOrder({ ...params, type: OrderType.market })
-}
+export class MarketOrderHandler {
+  constructor(private service: MarketOrderService) {}
+  newOrder = async (req: Request, res: Response) => {
+    const { error, value } = validateMarketOrder.new.validate(req.body)
+    if (error) return res.sendStatus(400)
 
-export const handleNewMarketOrder = async (req: Request, res: Response) => {
-  const { error, value } = validateMarketOrder.new.validate(req.body)
-  if (error) return res.sendStatus(400)
-
-  await newMarketOrder(value)
-  return res.send({ message: 'OK' })
+    await this.service.newOrder(value)
+    return res.send({ message: 'OK' })
+  }
 }

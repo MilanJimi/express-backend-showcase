@@ -1,27 +1,16 @@
 import { catchExceptions } from '@api/utils/errorHandler'
 import express from 'express'
+import { container } from 'tsyringe'
 
 import { authenticate } from '../../middleware/authenticate'
+import { StandingOrderHandler } from './handlers/standingOrderHandler'
 import {
-  handleFulfillOrder,
-  swgFulfillStandingOrder
-} from './handlers/fulfillStandingOrder'
-import {
-  handleGetOrderById,
-  swgGetSingleStandingOrder
-} from './handlers/getSingleStandingOrder'
-import {
-  handleGetFilteredOrders,
-  swgGetStandingOrders
-} from './handlers/getStandingOrders'
-import {
-  handleNewStandingOrder,
-  swgNewStandingOrder
-} from './handlers/newStandingOrder'
-import {
-  handleUpdateStandingOrder,
+  swgFulfillStandingOrder,
+  swgGetSingleStandingOrder,
+  swgGetStandingOrders,
+  swgNewStandingOrder,
   swgUpdateStandingOrder
-} from './handlers/updateStandingOrder'
+} from './handlers/swagger'
 
 export const swgStandingOrderRouter = {
   '/standingOrders': swgGetStandingOrders,
@@ -35,11 +24,12 @@ export const swgStandingOrderRouter = {
 
 const standingOrderRouter = express()
 standingOrderRouter.use(authenticate)
+const handler = container.resolve(StandingOrderHandler)
 
-standingOrderRouter.get('/', catchExceptions(handleGetFilteredOrders))
-standingOrderRouter.post('/new', catchExceptions(handleNewStandingOrder))
-standingOrderRouter.get('/:id', catchExceptions(handleGetOrderById))
-standingOrderRouter.post('/:id', catchExceptions(handleFulfillOrder))
-standingOrderRouter.put('/:id', catchExceptions(handleUpdateStandingOrder))
+standingOrderRouter.get('/', catchExceptions(handler.getFilteredOrders))
+standingOrderRouter.post('/new', catchExceptions(handler.newOrder))
+standingOrderRouter.get('/:id', catchExceptions(handler.getOrderById))
+standingOrderRouter.post('/:id', catchExceptions(handler.fulfillOrder))
+standingOrderRouter.put('/:id', catchExceptions(handler.updateStandingOrder))
 
 export { standingOrderRouter }

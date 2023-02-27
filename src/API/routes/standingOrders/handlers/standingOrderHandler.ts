@@ -1,9 +1,9 @@
 import { validateStandingOrder } from '@api/validators/standingOrderValidator'
 import { Request, Response } from 'express'
 import { OrderStatus, Denomination } from 'src/enums'
-import { automaticFulfillOrder } from 'src/methods/fulfillment/automaticFulfill'
 import { OrderType } from 'src/methods/fulfillment/types'
 import { injectable } from 'tsyringe'
+import { AutomaticFulfillmentService } from '../service/automaticFulfill'
 import { StandingOrderService } from '../service/standingOrderService'
 
 type QueryParams = Partial<{
@@ -18,17 +18,20 @@ type QueryParams = Partial<{
 
 @injectable()
 export class StandingOrderHandler {
-  constructor(private service: StandingOrderService) {}
+  constructor(
+    private orderService: StandingOrderService,
+    private autofulfillService: AutomaticFulfillmentService
+  ) {}
   fulfillOrder = async (req: Request, res: Response) => {
     const { error, value } = validateStandingOrder.fulfill.validate(req.body)
     if (error) return res.sendStatus(400)
     const orderId = req.params.id
 
-    await this.service.fulfillOrder(orderId, value)
+    await this.orderService.fulfillOrder(orderId, value)
     return res.send('OK')
   }
   getOrderById = async (req: Request, res: Response) =>
-    res.send(this.service.getSingle(req.params.id))
+    res.send(this.orderService.getSingle(req.params.id))
 
   getFilteredOrders = async (
     req: Request<unknown, unknown, unknown, QueryParams>,
@@ -43,7 +46,7 @@ export class StandingOrderHandler {
       perPage,
       page
     } = req.query
-    const orders = this.service.getMultiple(
+    const orders = this.orderService.getMultiple(
       {
         id,
         username,
@@ -61,7 +64,7 @@ export class StandingOrderHandler {
     const { error, value } = validateStandingOrder.new.validate(req.body)
     if (error) return res.sendStatus(400)
 
-    const response = await automaticFulfillOrder({
+    const response = await this.autofulfillService.automaticFulfillOrder({
       ...value,
       type: OrderType.standing
     })
@@ -73,7 +76,7 @@ export class StandingOrderHandler {
     if (error) return res.sendStatus(400)
 
     const { id } = req.params
-    await this.service.updateOrder(id, value)
+    await this.orderService.updateOrder(id, value)
 
     return res.send({ message: 'OK' })
   }

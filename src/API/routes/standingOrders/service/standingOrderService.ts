@@ -10,7 +10,8 @@ import { UserFacingError } from '@utils/error'
 import { ErrorCode, OrderStatus } from 'src/enums'
 import { log } from 'src/logging/logger'
 import { injectable } from 'tsyringe'
-import { isCancelledAndNotReactivated, getBalanceAdjustment } from './helpers'
+
+import { getBalanceAdjustment, isCancelledAndNotReactivated } from './helpers'
 
 @injectable()
 export class StandingOrderService {

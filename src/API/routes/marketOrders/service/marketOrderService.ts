@@ -1,11 +1,16 @@
+import { AutomaticFulfillmentService } from '@api/routes/standingOrders/service/automaticFulfill'
 import { injectable } from 'tsyringe'
-import { automaticFulfillOrder } from '../../../../methods/fulfillment/automaticFulfill'
+
 import { OrderType } from '../../../../methods/fulfillment/types'
 import { MarketOrderRequest } from '../../../validators/types'
 
 @injectable()
 export class MarketOrderService {
+  constructor(private autofulfillService: AutomaticFulfillmentService) {}
   newOrder = async (params: MarketOrderRequest) => {
-    await automaticFulfillOrder({ ...params, type: OrderType.market })
+    await this.autofulfillService.automaticFulfillOrder({
+      ...params,
+      type: OrderType.market
+    })
   }
 }
